@@ -1,7 +1,7 @@
 <h1 align="center">🌍 Mapico - AR Destekli Mobil Uygulama</h1>
 
 <br>
-# 🌍 Mapico - AR Destekli Mobil Uygulama
+
 
 Mapico, artırılmış gerçeklik (AR) teknolojisini kullanarak kullanıcılarına yerel kültürleri ve gelenekleri keşfetme fırsatı sunan, etkileşimli ve yenilikçi bir mobil uygulamadır. 📱🎮
 
