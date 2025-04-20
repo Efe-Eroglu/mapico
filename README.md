@@ -80,7 +80,7 @@ Bu sayede kullanıcılar, sadece oyun oynamakla kalmaz, aynı zamanda yerel kül
 ### 1. 🔽 Projeyi Klonla
 ```bash
 git clone https://github.com/mapicoo/mapico
-
+```
 2. 📁 Proje klasörüne gir:
 ```bash
 cd mapicoo
