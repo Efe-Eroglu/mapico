@@ -120,3 +120,7 @@ Takipte kalın, yerel kültürlerle dolu AR deneyimini Android cihazlarınızda 
 - ✅ Trello Scrum Board : https://trello.com/invite/b/67f8168fd458847c2f0d0fb1/ATTI5e7caf09f83e49631f7d7a05cd987fe1AE97F1CB/mapico
 - 🎬 Youtube Tanıtım Videomuz : https://www.youtube.com/watch?v=a013ftDj79w  
 - 🌐 Web Sitemiz : https://mapicoo.github.io
+- 
+
+# 📋 Not
+- Proje ait dokümanlara web sitemizden veya github repomuzun docs klasörü altından ulaşabilirsiniz.
