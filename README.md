@@ -3,20 +3,32 @@
 <br>
 
 
+### 🎮 Uygulama Tanıtımı
+
 Mapico, artırılmış gerçeklik (AR) teknolojisini kullanarak kullanıcılarına yerel kültürleri ve gelenekleri keşfetme fırsatı sunan, etkileşimli ve yenilikçi bir mobil uygulamadır. 📱🎮
+
+### 🌐 Gerçek Dünya ile Etkileşim
 
 Uygulama, kullanıcıların gerçek dünya ortamlarıyla etkileşime girerek, yerel oyun deneyimlerini dijital ortamda yaşamalarını sağlar. 🗺️  
 Mapico, modern teknolojiyi yerel kültürel öğelerle birleştirerek, kullanıcıların sadece eğlenceli bir oyun deneyimi yaşamasını değil, aynı zamanda kendi kültürlerini ve geleneklerini keşfetmelerini amaçlar. 🎯🌐
 
+### 🎭 Kültürel İçerikler
+
 Uygulama, artırılmış gerçeklik (AR) ile güçlendirilmiş oyunlarla, yerel halkın kültürünü, sembollerini, müziklerini, yemeklerini ve diğer geleneksel ögelerini sanal ortama taşır. 🎭🎶🍲  
 Mapico, oyunculara yalnızca oyun oynama imkanı sunmakla kalmaz, aynı zamanda yerel kültürlerin farklı yönlerini etkileşimli bir şekilde deneyimlemelerini sağlar. ✨🎯
+
+### 🕹️ Etkileşimli Oyun Mekaniği
 
 Bu mobil platform, kullanıcıların gerçek dünyada çevrelerine bakarak, sanal nesnelerle etkileşime girmelerini ve oyun içi görevleri gerçekleştirmelerini mümkün kılar. 🧩🕹️  
 Mapico, her biri farklı yerel temalarla tasarlanmış bir dizi oyun sunarak, oyuncuların bu geleneksel öğeleri oyun mekaniğiyle harmanlamalarına olanak tanır. 🧵💫  
 Uygulamanın sunduğu oyunlar, sadece eğlenceyi değil, aynı zamanda kültürel bilgiyi de oyunculara sunmayı hedefler. 📚🎉
 
+### 📍 Konum Tabanlı Deneyim
+
 Uygulama, kullanıcıların bulunduğu coğrafi konuma göre farklı kültürel içerikler ve oyunlar sunarak, her oyuncuya özgün bir deneyim yaşatır. 🌍📍  
 Mapico, artırılmış gerçeklik (AR) teknolojisini kullanarak, geleneksel oyunların dijital ortama taşınmasında ve kültürel etkileşimin teşvik edilmesinde öncü bir rol üstlenmektedir. 🚀🎨
+
+### 🌟 Eğitici ve Eğlenceli
 
 Bu sayede, oyuncular hem eğlenceli bir oyun deneyimi yaşar, hem de farklı kültürler hakkında bilgi sahibi olur. 🧠🎮  
 Mapico, yerel kültürlerin dijital dünyada yeniden hayat bulmasını sağlayan bir platform olarak, oyun deneyimini yalnızca eğlenceli değil, aynı zamanda eğitici ve kültürel açıdan zengin bir hale getirmektedir. 🌟📲
