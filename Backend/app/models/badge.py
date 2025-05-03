@@ -1,4 +1,7 @@
+# app/models/badge.py
+
 from sqlalchemy import Column, Integer, String, JSON
+from sqlalchemy.orm import relationship
 from app.db.base import Base
 
 class Badge(Base):
@@ -25,4 +28,11 @@ class Badge(Base):
         JSON,
         nullable=True,
         comment="Rozet kazanma kriterlerinin JSON formatındaki tanımı"
+    )
+
+    # ◀︎ UserBadge ↔ Badge (çift yönlü)
+    user_badges = relationship(
+        "UserBadge",
+        back_populates="badge",
+        cascade="all, delete-orphan"
     )

@@ -49,5 +49,4 @@ class User(Base):
     game_sessions = relationship("GameSession", back_populates="user", cascade="all, delete-orphan")
     # Leaderboard ↔ User
     leaderboards = relationship("Leaderboard", back_populates="user", cascade="all, delete-orphan")
-    # SessionBadge ↔ GameSession
-    session_badges = relationship("SessionBadge", back_populates="badge", cascade="all, delete-orphan")
+  
