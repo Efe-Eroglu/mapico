@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserRead
 from app.schemas.token import Token
-from app.services.auth import create_user, authenticate_user, create_access_token
+from app.services.auth import create_user, authenticate_user, create_access_token, get_current_user
 from app.db.session import get_db
 
 router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
@@ -55,3 +55,16 @@ def login_for_access_token(
         )
     token = create_access_token(data={"sub": user.email})
     return {"access_token": token, "token_type": "bearer"}
+
+
+@router.get(
+    "/me",
+    response_model=UserRead,
+    status_code=200,
+    summary="Get current user",
+    description="Return the currently authenticated user based on Bearer token"
+)
+def read_users_me(
+    current_user: UserRead = Depends(get_current_user)
+):
+    return current_user
