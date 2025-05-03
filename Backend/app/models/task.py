@@ -1,3 +1,5 @@
+# app/models/task.py
+
 from sqlalchemy import Column, Integer, ForeignKey, String, JSON
 from sqlalchemy.orm import relationship
 from app.db.base import Base
@@ -15,7 +17,7 @@ class Task(Base):
         Integer,
         ForeignKey("flight_stops.id", ondelete="CASCADE"),
         nullable=False,
-        comment="flight_stops tablosundaki ID"
+        comment="flight_stops tablosundaki id"
     )
     type = Column(
         String(50),
@@ -34,8 +36,12 @@ class Task(Base):
         comment="Tamamlandığında kazanılacak puan"
     )
 
-    # ◀︎ FlightStop ↔ Task
-    stop = relationship(
-        "FlightStop",
-        back_populates="tasks"
+    # FlightStop ↔ Task
+    stop = relationship("FlightStop", back_populates="tasks")
+
+    # ◀︎ Burayı ekleyin: Task ↔ UserTask (çift yönlü)
+    user_tasks = relationship(
+        "UserTask",
+        back_populates="task",
+        cascade="all, delete-orphan"
     )

@@ -1,3 +1,5 @@
+# app/models/flight_stop.py
+
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.base import Base
@@ -39,9 +41,23 @@ class FlightStop(Base):
         back_populates="stops"
     )
 
-    # ◀︎ Task ↔ FlightStop
+    # Task ↔ FlightStop
     tasks = relationship(
         "Task",
+        back_populates="stop",
+        cascade="all, delete-orphan"
+    )
+
+    # Asset ↔ FlightStop
+    assets = relationship(
+        "Asset",
+        back_populates="stop",
+        cascade="all, delete-orphan"
+    )
+
+    # ◀︎ PassportStamp ↔ FlightStop (yeni eklenen ilişki)
+    passport_stamps = relationship(
+        "PassportStamp",
         back_populates="stop",
         cascade="all, delete-orphan"
     )

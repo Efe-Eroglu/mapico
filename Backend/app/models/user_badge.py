@@ -1,3 +1,5 @@
+# app/models/user_badge.py
+
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
 from app.db.base import Base
@@ -30,6 +32,13 @@ class UserBadge(Base):
         comment="Rozetin kullanıcıya verildiği zaman"
     )
 
-    # İlişkiler
-    user = relationship("User", back_populates="badges")
-    badge = relationship("Badge", back_populates="users")
+    # ◀︎ User ↔ UserBadge
+    user = relationship(
+        "User",
+        back_populates="badges"
+    )
+    # ◀︎ Badge ↔ UserBadge
+    badge = relationship(
+        "Badge",
+        back_populates="user_badges"
+    )
