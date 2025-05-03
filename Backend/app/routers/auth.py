@@ -1,11 +1,18 @@
 # app/routers/auth.py
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 from app.schemas.token import Token
-from app.services.auth import create_user, authenticate_user, create_access_token, get_current_user
+from app.services.auth import (
+    create_user,
+    authenticate_user,
+    create_access_token,
+    get_current_user,
+    oauth2_scheme,
+    blacklisted_tokens,
+)
 from app.db.session import get_db
 from app.core.security import get_password_hash
 
@@ -97,3 +104,23 @@ def update_me(
     db.refresh(current_user)
 
     return current_user
+
+
+@router.post(
+    "/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Log out",
+    description="Invalidate the current access token"
+)
+def logout(
+    # 1) token geçerli mi diye kontrol et
+    current_user = Depends(get_current_user),
+    # 2) ham token’ı al
+    token: str = Depends(oauth2_scheme),
+):
+    """
+    Mevcut Bearer token’ı blacklist’e ekle.
+    Sonrasında aynı token ile yapılan istekler 401 dönecek.
+    """
+    blacklisted_tokens.add(token)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -18,6 +18,8 @@ from app.db.session import get_db
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
+blacklisted_tokens: set[str] = set()
+
 def create_user(db: Session, user_in: UserCreate) -> User:
     """
     Yeni bir kullanıcı kaydı oluşturur.
@@ -65,10 +67,6 @@ def create_access_token(
     data: dict,
     expires_delta: Optional[timedelta] = None
 ) -> str:
-    """
-    JWT oluşturur. data içine en az {"sub": user.email} koymalısınız.
-    expire süresi settings.ACCESS_TOKEN_EXPIRE_MINUTES’ten alınır.
-    """
     to_encode = data.copy()
     expire = datetime.utcnow() + (
         expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -83,9 +81,24 @@ def create_access_token(
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),  
+    token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
 ) -> User:
+    """
+    1) Token blacklist’te mi? (logout oldu mu?)
+    2) Decode et, payload’dan email al
+    3) DB’den user çek
+    4) Bulamazsa veya hata olursa 401 fırlat
+    """
+    # 1) Logout edilmiş token kontrolü
+    if token in blacklisted_tokens:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has been revoked",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # 2) Decode & email al
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -103,7 +116,9 @@ def get_current_user(
     except JWTError:
         raise credentials_exception
 
+    # 3) Kullanıcıyı DB’den çek
     user = db.query(User).filter(User.email == email).first()
     if user is None:
         raise credentials_exception
+
     return user
