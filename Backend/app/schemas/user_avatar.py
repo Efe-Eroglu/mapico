@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
+from app.schemas.avatar import AvatarRead
 
 class UserAvatarBase(BaseModel):
     avatar_id: Optional[int] = Field(
@@ -27,6 +28,7 @@ class UserAvatarRead(BaseModel):
     user_id: int
     avatar_id: int
     selected_at: datetime
+    avatar: AvatarRead  
 
     class Config:
         orm_mode = True

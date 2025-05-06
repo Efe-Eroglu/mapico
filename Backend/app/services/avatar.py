@@ -1,6 +1,7 @@
+# app\services\avatar.py
 from typing import List
 from sqlalchemy.orm import Session
-
+from cryptography.fernet import InvalidToken
 from app.models.avatar import Avatar
 from app.schemas.avatar import AvatarCreate
 from app.core.encryption import encryption_service
@@ -8,9 +9,17 @@ from app.core.encryption import encryption_service
 def get_all_avatars(db: Session) -> List[Avatar]:
     avatars = db.query(Avatar).order_by(Avatar.id).all()
     for a in avatars:
-        a.name = encryption_service.decrypt(a.name)
+        try:
+            a.name = encryption_service.decrypt(a.name)
+        except InvalidToken:
+            pass
+
         if a.description is not None:
-            a.description = encryption_service.decrypt(a.description)
+            try:
+                a.description = encryption_service.decrypt(a.description)
+            except InvalidToken:
+                pass
+
     return avatars
 
 def create_avatar(db: Session, avatar_in: AvatarCreate) -> Avatar:

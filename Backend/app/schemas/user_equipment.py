@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
+from app.schemas.equipment import EquipmentRead
 
 class UserEquipmentBase(BaseModel):
     equipment_id: int = Field(..., description="Seçilen ekipman ID’si")
@@ -24,3 +25,13 @@ class UserEquipmentUpdate(BaseModel):
     Güncelleme şeması; genelde equipment_id değişikliği için kullanılır.
     """
     equipment_id: int = Field(..., description="Yeni ekipman ID’si")
+
+
+class UserEquipmentWithDetail(BaseModel):
+    id: int = Field(..., description="Kayıt ID")
+    user_id: int = Field(..., description="Kullanıcı ID")
+    selected_at: datetime = Field(..., description="Seçim zamanı")
+    equipment: EquipmentRead
+
+    class Config:
+        orm_mode = True
