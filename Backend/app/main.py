@@ -7,7 +7,6 @@ from sqlalchemy import text
 from app.core.config import settings
 from app.db.session import engine, get_db
 from app.db.base import Base
-from app.routers.encryption import router as encryption_router
 
 from app.models.user import User
 from app.models.avatar import Avatar
@@ -31,6 +30,8 @@ from app.models.leaderboard import Leaderboard
 from app.models.session_badge import SessionBadge
 
 from app.routers.auth import router as auth_router
+from app.routers.encryption import router as encryption_router
+from app.routers.avatar import router as avatar_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -46,7 +47,7 @@ app = FastAPI(
 # All Routers
 app.include_router(auth_router)
 app.include_router(encryption_router)
-
+app.include_router(avatar_router)
 
 
 
