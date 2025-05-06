@@ -32,6 +32,8 @@ from app.models.session_badge import SessionBadge
 from app.routers.auth import router as auth_router
 from app.routers.encryption import router as encryption_router
 from app.routers.avatar import router as avatar_router
+from app.routers.equipment import router as equipment_router 
+from app.routers.user_avatar import router as user_avatar_router    
 
 Base.metadata.create_all(bind=engine)
 
@@ -48,6 +50,8 @@ app = FastAPI(
 app.include_router(auth_router)
 app.include_router(encryption_router)
 app.include_router(avatar_router)
+app.include_router(equipment_router)
+app.include_router(user_avatar_router)
 
 
 

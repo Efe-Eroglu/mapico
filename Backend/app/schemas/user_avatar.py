@@ -15,13 +15,18 @@ class UserAvatarCreate(UserAvatarBase):
     """
     pass
 
-class UserAvatarRead(UserAvatarBase):
-    id: int = Field(..., description="Pivot tablonun ID’si")
-    user_id: int = Field(..., description="Kullanıcı ID")
-    selected_at: datetime = Field(..., description="Seçim zamanı")
+class UserAvatarUpdate(BaseModel):
+    avatar_id: Optional[int] = Field(None, description="Yeni avatar parçası ID")
+
+
+class UserAvatarAssign(BaseModel):
+    avatar_id: int = Field(..., description="Atanacak avatar'ın ID'si")
+
+class UserAvatarRead(BaseModel):
+    id: int
+    user_id: int
+    avatar_id: int
+    selected_at: datetime
 
     class Config:
         orm_mode = True
-
-class UserAvatarUpdate(BaseModel):
-    avatar_id: Optional[int] = Field(None, description="Yeni avatar parçası ID")
