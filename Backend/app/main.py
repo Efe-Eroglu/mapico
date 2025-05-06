@@ -7,7 +7,6 @@ from sqlalchemy import text
 from app.core.config import settings
 from app.db.session import engine, get_db
 from app.db.base import Base
-from app.routers.encryption import router as encryption_router
 
 from app.models.user import User
 from app.models.avatar import Avatar
@@ -31,6 +30,13 @@ from app.models.leaderboard import Leaderboard
 from app.models.session_badge import SessionBadge
 
 from app.routers.auth import router as auth_router
+from app.routers.encryption import router as encryption_router
+from app.routers.avatar import router as avatar_router
+from app.routers.equipment import router as equipment_router 
+from app.routers.user_avatar import router as user_avatar_router    
+from app.routers.user_equipment import router as user_equipment_router
+from app.routers.flight import router as flight_router
+from app.routers.flight_stop import router as flight_stop_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -41,13 +47,15 @@ app = FastAPI(
     docs_url="/api/v1/docs"
 )
 
-
-
 # All Routers
 app.include_router(auth_router)
 app.include_router(encryption_router)
-
-
+app.include_router(avatar_router)
+app.include_router(equipment_router)
+app.include_router(user_avatar_router)
+app.include_router(user_equipment_router)
+app.include_router(flight_router)
+app.include_router(flight_stop_router)
 
 
 @app.get("/api/v1/health", tags=["Health"])

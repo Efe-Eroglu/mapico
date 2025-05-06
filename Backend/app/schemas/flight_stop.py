@@ -8,6 +8,9 @@ class FlightStopBase(BaseModel):
     reward_badge: Optional[int] = Field(
         None, description="Ödül rozet ID (opsiyonel)"
     )
+    description: Optional[str] = Field(
+        None, description="Durak açıklaması (opsiyonel)"
+    )  # description alanı ekledik
 
 class FlightStopCreate(FlightStopBase):
     """
@@ -28,3 +31,4 @@ class FlightStopUpdate(BaseModel):
     name: Optional[str] = Field(None, max_length=100)
     order: Optional[int] = Field(None, ge=1)
     reward_badge: Optional[int] = None
+    description: Optional[str] = None  # description ekledik

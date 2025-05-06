@@ -1,6 +1,4 @@
-# app/models/flight_stop.py
-
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 
@@ -34,6 +32,11 @@ class FlightStop(Base):
         nullable=True,
         comment="Ödül rozet ID (badges tablosuna referans)"
     )
+    description = Column(
+        Text,
+        nullable=True,
+        comment="Durak açıklaması (isteğe bağlı)"
+    )  # description alanı eklendi
 
     # Flight ↔ FlightStop
     flight = relationship(
