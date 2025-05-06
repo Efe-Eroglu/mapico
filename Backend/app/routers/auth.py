@@ -89,16 +89,13 @@ def update_me(
     current_user = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    # Sadece gelen alanları güncelle
     if user_in.full_name is not None:
         current_user.full_name = user_in.full_name
     if user_in.date_of_birth is not None:
         current_user.date_of_birth = user_in.date_of_birth
     if user_in.password is not None:
-        # Parolayı hash’leyip güncelle
         current_user.hashed_password = get_password_hash(user_in.password)
 
-    # Commit & refresh
     db.add(current_user)
     db.commit()
     db.refresh(current_user)

@@ -7,6 +7,7 @@ from sqlalchemy import text
 from app.core.config import settings
 from app.db.session import engine, get_db
 from app.db.base import Base
+from app.routers.encryption import router as encryption_router
 
 from app.models.user import User
 from app.models.avatar import Avatar
@@ -40,8 +41,14 @@ app = FastAPI(
     docs_url="/api/v1/docs"
 )
 
-# Auth router
+
+
+# All Routers
 app.include_router(auth_router)
+app.include_router(encryption_router)
+
+
+
 
 @app.get("/api/v1/health", tags=["Health"])
 def health_check(db: Session = Depends(get_db)):
