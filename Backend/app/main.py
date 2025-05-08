@@ -39,6 +39,7 @@ from app.routers.flight import router as flight_router
 from app.routers.flight_stop import router as flight_stop_router
 from app.routers.game import router as game_router
 from app.routers.game_session import router as game_session_router
+from app.routers.leaderboard import router as leaderboard_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -60,7 +61,7 @@ app.include_router(flight_router)
 app.include_router(flight_stop_router)
 app.include_router(game_router)
 app.include_router(game_session_router)
-
+app.include_router(leaderboard_router)
 
 @app.get("/api/v1/health", tags=["Health"])
 def health_check(db: Session = Depends(get_db)):
