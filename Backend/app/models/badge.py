@@ -14,7 +14,7 @@ class Badge(Base):
         comment="Birincil anahtar"
     )
     name = Column(
-        String(100),
+        String(100),    
         nullable=False,
         unique=True,
         comment="Rozet adı, örn. 'Explorer', 'Math Whiz'"

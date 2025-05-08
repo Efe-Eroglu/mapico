@@ -15,6 +15,7 @@ class GameSessionCreate(GameSessionBase):
 
 class GameSessionRead(GameSessionBase):
     id: int = Field(..., description="Oturum ID")
+    user_name: str 
 
     class Config:
         orm_mode = True

@@ -3,13 +3,33 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.schemas.game_session import GameSessionRead, GameSessionCreate
-from app.services.game_session import get_all_game_sessions, get_game_sessions_by_user_id, get_game_sessions_by_game_id, get_game_sessions_by_user_and_game_id, create_game_session, get_game_sessions_by_filtered_game_id
+from app.services.game_session import get_all_game_sessions, get_game_sessions_by_user_id, get_game_sessions_by_game_id, get_game_sessions_by_user_and_game_id, create_game_session, get_game_sessions_by_filtered_game_id, get_game_sessions_sorted_by_score_with_user_names
 from app.db.session import get_db
 
 router = APIRouter(prefix="/api/v1/game_sessions", tags=["GameSessions"])
 
 
-
+@router.get(
+    "/sorted_by_score/{game_id}",
+    response_model=List[GameSessionRead],
+    status_code=status.HTTP_200_OK,
+    summary="Get game sessions for a specific game, sorted by score",
+    description="Belirli bir oyun için oyun oturumlarını alır ve skorlarına göre sıralar, oyuncuların isimlerini de döndürür"
+)
+def get_game_sessions_sorted_by_score(
+    game_id: int,  # game_id parametresi URL'den alınacak
+    db: Session = Depends(get_db)
+):
+    try:
+        game_sessions = get_game_sessions_sorted_by_score_with_user_names(db, game_id)
+        return game_sessions
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Bir hata oluştu: {str(e)}"
+        )
+        
+        
 # game_id'ye göre oyun oturumlarını filtreleyerek getirme
 @router.get(
     "/filter",
@@ -30,6 +50,8 @@ def get_filtered_game_sessions(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Bir hata oluştu: {str(e)}"
         )
+        
+
 
 # Tüm oyun oturumlarını getirme
 @router.get(
@@ -136,5 +158,3 @@ def create_game_session_endpoint(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Bir hata oluştu: {str(e)}"
         )
-
-
