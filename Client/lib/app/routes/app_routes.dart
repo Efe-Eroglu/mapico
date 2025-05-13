@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:mapico/screens/login/login_screen.dart';
-
-class AppRoutes {
-  static Map<String, WidgetBuilder> routes = {
-    '/login': (_) => const LoginScreen(),
-    
-  };
+abstract class AppRoutes {
+  static const HOME = '/home';
+  static const LOGIN = '/login';
+  static const REGISTER = '/register';
+  static const PROFILE = '/profile';
+  static const SETTINGS = '/settings';
+  static const NOTIFICATIONS = '/notifications';
+  static const CREATE = '/create';
 }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:mapico/core/utils/validators.dart';
 import 'package:mapico/widgets/app_text_field.dart';
 import 'package:mapico/widgets/custom_button.dart';
+import 'package:mapico/services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,10 +17,33 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
-  void _handleLogin() {
+  void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
-      print('Giriş yapılıyor: ${_emailController.text}');
+      setState(() {
+        _isLoading = true;
+      });
+      final authService = AuthService();
+      final token = await authService.login(
+        username: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+      if (token != null) {
+        // Ana sayfaya yönlendir
+        Get.offAllNamed('/home');
+      } else {
+        // Hata mesajı göster
+        Get.snackbar(
+          'Giriş Başarısız',
+          'Kullanıcı adı veya şifre hatalı.',
+          backgroundColor: Colors.red.shade100,
+          colorText: Colors.black,
+        );
+      }
     }
   }
 
@@ -73,12 +98,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 16),
 
-                       // 🚀 Lottie animasyonu
-Lottie.network(
-  'https://lottie.host/2a8c8fce-de75-4765-9c5e-c4ab63113062/1mlLfyBOM3.json',
-  height: 160,
-  repeat: true,
-),
+                        // 🚀 Lottie animasyonu
+                        Lottie.network(
+                          'https://lottie.host/2a8c8fce-de75-4765-9c5e-c4ab63113062/1mlLfyBOM3.json',
+                          height: 160,
+                          repeat: true,
+                        ),
 
                         const SizedBox(height: 24),
 
@@ -99,7 +124,8 @@ Lottie.network(
 
                         CustomButton(
                           text: '🚀 Giriş Yap',
-                          onPressed: _handleLogin,
+                          onPressed: _isLoading ? null : _handleLogin,
+                          isLoading: _isLoading,
                         ),
 
                         const SizedBox(height: 12),
@@ -111,6 +137,11 @@ Lottie.network(
                             color: Colors.grey,
                           ),
                           textAlign: TextAlign.center,
+                        ),
+
+                        TextButton(
+                          onPressed: () => Get.toNamed('/register'),
+                          child: const Text('Hesabın yok mu? Kayıt ol'),
                         ),
                       ],
                     ),

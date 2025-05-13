@@ -13,6 +13,11 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.8
   lottie: ^2.7.0
+  get: ^4.6.6
+  get_storage: ^2.1.1
+  dio: ^5.4.0
+  flutter_dotenv: ^5.1.0
+  http: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -25,3 +30,4 @@ flutter:
 
   assets:
     - assets/images/giris.png
+    - .env
