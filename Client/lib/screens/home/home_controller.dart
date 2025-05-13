@@ -1,10 +1,16 @@
 import 'package:get/get.dart';
 import '../../core/base/base_controller.dart';
+import 'package:mapico/models/user_model.dart';
+import 'package:mapico/models/avatar_model.dart';
+import 'package:mapico/services/auth_service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class HomeController extends BaseController {
   // Kullanıcı bilgileri
   final userName = 'Misafir'.obs;
   final userRole = 'Kullanıcı'.obs;
+  final user = Rxn<UserModel>();
+  final avatar = Rxn<AvatarModel>();
 
   @override
   void onInit() {
@@ -15,10 +21,21 @@ class HomeController extends BaseController {
   Future<void> loadUserData() async {
     setLoading(true);
     try {
-      // TODO: Kullanıcı verilerini yükle
-      await Future.delayed(const Duration(seconds: 1)); // Simüle edilmiş gecikme
-      userName.value = 'Ahmet Yılmaz';
-      userRole.value = 'Premium Üye';
+      const storage = FlutterSecureStorage();
+      final token = await storage.read(key: 'jwt_token');
+      if (token != null) {
+        final authService = AuthService();
+        final (userData, userError) = await authService.getCurrentUser(token);
+        final (avatarData, avatarError) = await authService.getUserAvatar(token);
+        if (userData != null) {
+          user.value = userData;
+          userName.value = userData.fullName;
+        }
+        if (avatarData != null) {
+          avatar.value = avatarData;
+        }
+        // userRole örnek: Premium Üye, Normal Kullanıcı vs. (gerekirse güncellenebilir)
+      }
     } catch (e) {
       showError('Kullanıcı bilgileri yüklenemedi');
     } finally {

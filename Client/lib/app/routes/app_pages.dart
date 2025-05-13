@@ -3,6 +3,7 @@ import '../../screens/home/home_binding.dart';
 import '../../screens/home/home_view.dart';
 import '../../screens/login/login_screen.dart';
 import '../../screens/register/register_screen.dart';
+import '../../screens/profile/profile_screen.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -19,6 +20,10 @@ class AppPages {
     GetPage(
       name: AppRoutes.REGISTER,
       page: () => const RegisterScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.PROFILE,
+      page: () => const ProfileScreen(),
     ),
   ];
 }

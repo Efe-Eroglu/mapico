@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mapico/models/user_model.dart';
+import 'package:mapico/models/avatar_model.dart';
 
 class AuthService {
         static const String _baseUrl = 'http://10.0.2.2:8000/api/v1';
@@ -64,6 +65,140 @@ class AuthService {
         }
       } catch (_) {}
       print('Register failed: \\${response.statusCode} - \\${response.body}');
+      return (null, errorMsg);
+    }
+  }
+
+  Future<(AvatarModel?, String?)> getAvatar(String token) async {
+    final url = Uri.parse('$_baseUrl/avatars/');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data is List && data.isNotEmpty) {
+        return (AvatarModel.fromJson(data[0]), null);
+      } else {
+        return (null, 'Avatar bulunamadı');
+      }
+    } else {
+      String errorMsg = 'Avatar alınamadı';
+      try {
+        final data = json.decode(response.body);
+        if (data is Map && data['detail'] != null) {
+          errorMsg = data['detail'].toString();
+        }
+      } catch (_) {}
+      print('Get avatar failed: \\${response.statusCode} - \\${response.body}');
+      return (null, errorMsg);
+    }
+  }
+
+  // Kullanıcının avatarını getir
+  Future<(AvatarModel?, String?)> getUserAvatar(String token) async {
+    final url = Uri.parse('$_baseUrl/users/me/avatar');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return (AvatarModel.fromJson(data['avatar']), null);
+    } else {
+      String errorMsg = 'Avatar alınamadı';
+      try {
+        final data = json.decode(response.body);
+        if (data is Map && data['detail'] != null) {
+          errorMsg = data['detail'].toString();
+        }
+      } catch (_) {}
+      print('Get user avatar failed: \\${response.statusCode} - \\${response.body}');
+      return (null, errorMsg);
+    }
+  }
+
+  // Tüm avatarları listele
+  Future<(List<AvatarModel>, String?)> getAllAvatars(String token) async {
+    final url = Uri.parse('$_baseUrl/avatars/');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data is List) {
+        return (data.map((e) => AvatarModel.fromJson(e)).toList(), null);
+      } else {
+        return (<AvatarModel>[], 'Avatar listesi alınamadı');
+      }
+    } else {
+      String errorMsg = 'Avatar listesi alınamadı';
+      try {
+        final data = json.decode(response.body);
+        if (data is Map && data['detail'] != null) {
+          errorMsg = data['detail'].toString();
+        }
+      } catch (_) {}
+      print('Get all avatars failed: \\${response.statusCode} - \\${response.body}');
+      return (<AvatarModel>[], errorMsg);
+    }
+  }
+
+  // Kullanıcı avatarını güncelle
+  Future<String?> updateUserAvatar(String token, int avatarId) async {
+    final url = Uri.parse('$_baseUrl/users/me/avatar');
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'avatar_id': avatarId,
+      }),
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return null; // Başarılı
+    } else {
+      String errorMsg = 'Avatar güncellenemedi';
+      try {
+        final data = json.decode(response.body);
+        if (data is Map && data['detail'] != null) {
+          errorMsg = data['detail'].toString();
+        }
+      } catch (_) {}
+      print('Update user avatar failed: \\${response.statusCode} - \\${response.body}');
+      return errorMsg;
+    }
+  }
+
+  Future<(UserModel?, String?)> getCurrentUser(String token) async {
+    final url = Uri.parse('$_baseUrl/auth/me');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return (UserModel.fromJson(data), null);
+    } else {
+      String errorMsg = 'Kullanıcı bilgisi alınamadı';
+      try {
+        final data = json.decode(response.body);
+        if (data is Map && data['detail'] != null) {
+          errorMsg = data['detail'].toString();
+        }
+      } catch (_) {}
+      print('Get current user failed: \\${response.statusCode} - \\${response.body}');
       return (null, errorMsg);
     }
   }

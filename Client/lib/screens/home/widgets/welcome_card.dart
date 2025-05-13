@@ -19,17 +19,22 @@ class WelcomeCard extends GetView<HomeController> {
           children: [
             Row(
               children: [
-                const CircleAvatar(
-                  radius: 30,
-                  child: Icon(Icons.person, size: 30),
-                ),
+                Obx(() => controller.avatar.value != null
+                    ? CircleAvatar(
+                        radius: 30,
+                        backgroundImage: NetworkImage(controller.avatar.value!.imageUrl),
+                      )
+                    : const CircleAvatar(
+                        radius: 30,
+                        child: Icon(Icons.person, size: 30),
+                      )),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Obx(() => Text(
-                            'Hoş Geldin, ${controller.userName}',
+                            'Hoş Geldin, ${controller.user.value?.fullName ?? controller.userName.value}',
                             style: Theme.of(context).textTheme.titleLarge,
                           )),
                       const SizedBox(height: 4),

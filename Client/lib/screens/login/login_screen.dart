@@ -5,6 +5,7 @@ import 'package:mapico/core/utils/validators.dart';
 import 'package:mapico/widgets/app_text_field.dart';
 import 'package:mapico/widgets/custom_button.dart';
 import 'package:mapico/services/auth_service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,6 +34,9 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = false;
       });
       if (token != null) {
+        // Token'ı güvenli depoya kaydet
+        const storage = FlutterSecureStorage();
+        await storage.write(key: 'jwt_token', value: token);
         // Ana sayfaya yönlendir
         Get.offAllNamed('/home');
       } else {
