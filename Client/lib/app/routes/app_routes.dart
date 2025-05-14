@@ -6,4 +6,5 @@ abstract class AppRoutes {
   static const SETTINGS = '/settings';
   static const NOTIFICATIONS = '/notifications';
   static const CREATE = '/create';
+  static const EQUIPMENT = '/equipment';
 }

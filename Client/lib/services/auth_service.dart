@@ -4,19 +4,17 @@ import 'package:mapico/models/user_model.dart';
 import 'package:mapico/models/avatar_model.dart';
 
 class AuthService {
-        static const String _baseUrl = 'http://10.0.2.2:8000/api/v1';
+  static const String _baseUrl = 'http://10.0.2.2:8000/api/v1';
 
-  Future<String?> login({required String username, required String password}) async {
+  Future<String?> login({
+    required String username,
+    required String password,
+  }) async {
     final url = Uri.parse('$_baseUrl/auth/login');
     final response = await http.post(
       url,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: {
-        'username': username,
-        'password': password,
-      },
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: {'username': username, 'password': password},
     );
 
     if (response.statusCode == 200) {
@@ -26,7 +24,7 @@ class AuthService {
       print('Login failed: \\${response.statusCode} - \\${response.body}');
       return null;
     }
-  }
+  } 
 
   Future<(UserModel?, String?)> register({
     required String email,
@@ -37,9 +35,7 @@ class AuthService {
     final url = Uri.parse('$_baseUrl/auth/register');
     final response = await http.post(
       url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'email': email,
         'full_name': fullName,
@@ -57,7 +53,9 @@ class AuthService {
       try {
         final data = json.decode(response.body);
         if (data is Map && data['detail'] != null) {
-          if (data['detail'] is List && data['detail'].isNotEmpty && data['detail'][0]['msg'] != null) {
+          if (data['detail'] is List &&
+              data['detail'].isNotEmpty &&
+              data['detail'][0]['msg'] != null) {
             errorMsg = data['detail'][0]['msg'];
           } else if (data['detail'] is String) {
             errorMsg = data['detail'];
@@ -73,9 +71,7 @@ class AuthService {
     final url = Uri.parse('$_baseUrl/avatars/');
     final response = await http.get(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'Authorization': 'Bearer $token'},
     );
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -102,9 +98,7 @@ class AuthService {
     final url = Uri.parse('$_baseUrl/users/me/avatar');
     final response = await http.get(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'Authorization': 'Bearer $token'},
     );
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -117,7 +111,9 @@ class AuthService {
           errorMsg = data['detail'].toString();
         }
       } catch (_) {}
-      print('Get user avatar failed: \\${response.statusCode} - \\${response.body}');
+      print(
+        'Get user avatar failed: \\${response.statusCode} - \\${response.body}',
+      );
       return (null, errorMsg);
     }
   }
@@ -127,9 +123,7 @@ class AuthService {
     final url = Uri.parse('$_baseUrl/avatars/');
     final response = await http.get(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'Authorization': 'Bearer $token'},
     );
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -146,7 +140,9 @@ class AuthService {
           errorMsg = data['detail'].toString();
         }
       } catch (_) {}
-      print('Get all avatars failed: \\${response.statusCode} - \\${response.body}');
+      print(
+        'Get all avatars failed: \\${response.statusCode} - \\${response.body}',
+      );
       return (<AvatarModel>[], errorMsg);
     }
   }
@@ -160,9 +156,7 @@ class AuthService {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
-      body: json.encode({
-        'avatar_id': avatarId,
-      }),
+      body: json.encode({'avatar_id': avatarId}),
     );
     if (response.statusCode == 200 || response.statusCode == 201) {
       return null; // Başarılı
@@ -174,7 +168,9 @@ class AuthService {
           errorMsg = data['detail'].toString();
         }
       } catch (_) {}
-      print('Update user avatar failed: \\${response.statusCode} - \\${response.body}');
+      print(
+        'Update user avatar failed: \\${response.statusCode} - \\${response.body}',
+      );
       return errorMsg;
     }
   }
@@ -183,9 +179,7 @@ class AuthService {
     final url = Uri.parse('$_baseUrl/auth/me');
     final response = await http.get(
       url,
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'Authorization': 'Bearer $token'},
     );
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
@@ -198,8 +192,10 @@ class AuthService {
           errorMsg = data['detail'].toString();
         }
       } catch (_) {}
-      print('Get current user failed: \\${response.statusCode} - \\${response.body}');
+      print(
+        'Get current user failed: \\${response.statusCode} - \\${response.body}',
+      );
       return (null, errorMsg);
     }
   }
-} 
+}
