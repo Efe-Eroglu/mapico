@@ -7,4 +7,5 @@ abstract class AppRoutes {
   static const NOTIFICATIONS = '/notifications';
   static const CREATE = '/create';
   static const EQUIPMENT = '/equipment';
+  static const MY_EQUIPMENT = '/my_equipment';
 }

@@ -5,6 +5,7 @@ import '../../screens/login/login_screen.dart';
 import '../../screens/register/register_screen.dart';
 import '../../screens/profile/profile_screen.dart';
 import '../../screens/equipment/equipment_screen.dart';
+import '../../screens/equipment/my_equipment_screen.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -29,6 +30,10 @@ class AppPages {
     GetPage(
       name: AppRoutes.EQUIPMENT,
       page: () => const EquipmentScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.MY_EQUIPMENT,
+      page: () => const MyEquipmentScreen(),
     ),
   ];
 }
