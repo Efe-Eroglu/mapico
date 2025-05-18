@@ -4,6 +4,7 @@ import 'home_controller.dart';
 import 'widgets/welcome_card.dart';
 import 'widgets/featured_section.dart';
 import 'widgets/quick_actions.dart';
+import 'widgets/games_card.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({Key? key}) : super(key: key);
@@ -39,6 +40,8 @@ class HomeView extends GetView<HomeController> {
                 const FeaturedSection(),
                 const SizedBox(height: 24),
                 const QuickActions(),
+                const SizedBox(height: 24),
+                const GamesCard(),
               ],
             ),
           ),

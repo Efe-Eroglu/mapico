@@ -8,4 +8,6 @@ abstract class AppRoutes {
   static const CREATE = '/create';
   static const EQUIPMENT = '/equipment';
   static const MY_EQUIPMENT = '/my_equipment';
+  static const FLIGHTS = '/flights';
+  static const FLIGHT_DETAILS = '/flight_details';
 }

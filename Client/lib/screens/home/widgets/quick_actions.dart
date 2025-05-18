@@ -58,6 +58,13 @@ class QuickActions extends GetView<HomeController> {
               Colors.teal,
               () => Get.toNamed('/equipment'),
             ),
+            _buildActionCard(
+              context,
+              'Uçuşlar',
+              Icons.flight,
+              Colors.deepOrange,
+              () => Get.toNamed('/flights'),
+            ),
           ],
         ),
       ],
