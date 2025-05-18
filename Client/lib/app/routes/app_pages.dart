@@ -9,6 +9,9 @@ import '../../screens/equipment/my_equipment_screen.dart';
 import '../../screens/flight/flight_screen.dart';
 import '../../screens/flight/flight_details_screen.dart';
 import '../../screens/flight/flight_binding.dart';
+import '../../screens/badge/badge_screen.dart';
+import '../../screens/badge/badge_details_screen.dart';
+import '../../screens/badge/badge_binding.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -46,6 +49,15 @@ class AppPages {
     GetPage(
       name: AppRoutes.FLIGHT_DETAILS,
       page: () => const FlightDetailsScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.BADGES,
+      page: () => const BadgeScreen(),
+      binding: BadgeBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.BADGE_DETAILS,
+      page: () => const BadgeDetailsScreen(),
     ),
   ];
 }
