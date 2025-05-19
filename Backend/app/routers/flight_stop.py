@@ -2,8 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.schemas.flight_stop import FlightStopCreate, FlightStopRead
-from app.services.flight_stop import create_flight_stop, get_all_flight_stops, update_flight_stop
+from app.services.flight_stop import create_flight_stop, get_all_flight_stops
 from app.db.session import get_db
+from app.core.encryption import encryption_service 
+from app.models.flight_stop import FlightStop
 
 router = APIRouter(prefix="/api/v1/flight_stops", tags=["FlightStops"])
 
@@ -28,15 +30,14 @@ def create_new_flight_stop(
             detail=f"Bir hata oluştu: {str(e)}"
         )
 
-# Tüm uçuş duraklarını listeleme (şifreli)
 @router.get(
-    "",
+    "/all",
     response_model=List[FlightStopRead],
     status_code=status.HTTP_200_OK,
     summary="Get all flight stops",
     description="Tüm uçuş duraklarını listeler"
 )
-def list_flight_stops(
+def get_all_flight_stops_endpoint(
     db: Session = Depends(get_db)
 ):
     try:
@@ -48,24 +49,37 @@ def list_flight_stops(
             detail=f"Bir hata oluştu: {str(e)}"
         )
 
-# Uçuş durağını güncelleme (şifreli)
-@router.put(
-    "/{flight_stop_id}",
-    response_model=FlightStopRead,
+
+# app/routers/flight_stop.py
+@router.get(
+    "/by_flight/{flight_id}",
+    response_model=List[FlightStopRead],
     status_code=status.HTTP_200_OK,
-    summary="Update a flight stop",
-    description="Bir uçuş durağını günceller"
+    summary="Get flight stops for a specific flight",
+    description="Belirli bir flight_id'ye sahip uçuş duraklarını listeler"
 )
-def update_flight_stop_endpoint(
-    flight_stop_id: int,
-    flight_stop_in: FlightStopCreate,
+def get_flight_stops_by_flight_id(
+    flight_id: int,
     db: Session = Depends(get_db)
 ):
     try:
-        flight_stop = update_flight_stop(db, flight_stop_id, flight_stop_in)
-        return flight_stop
+        flight_stops = db.query(FlightStop).filter(FlightStop.flight_id == flight_id).all()
+
+        if not flight_stops:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No flight stops found for flight ID {flight_id}"
+            )
+
+        # Şifrelenmiş verileri deşifre ediyoruz
+        for flight_stop in flight_stops:
+            flight_stop.name = encryption_service.decrypt(flight_stop.name)
+            if flight_stop.description:
+                flight_stop.description = encryption_service.decrypt(flight_stop.description)
+
+        return flight_stops
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Bir hata oluştu: {str(e)}"
         )

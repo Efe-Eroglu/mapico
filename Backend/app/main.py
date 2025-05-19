@@ -43,6 +43,7 @@ from app.routers.leaderboard import router as leaderboard_router
 from app.routers.badge import router as badge_router
 from app.routers.user_badge import router as user_badge_router
 
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
