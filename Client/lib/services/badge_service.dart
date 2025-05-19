@@ -217,80 +217,77 @@ class BadgeService {
     ];
   }
 
-  // Tek bir rozeti ID'ye göre getir
-  Future<(BadgeModel?, String?)> getBadge(String token, int badgeId) async {
-    final url = Uri.parse('$_baseUrl/badges/$badgeId');
-    
+  // Belirli bir rozetin detaylarını getir
+  Future<BadgeModel?> getBadgeDetail(int badgeId, [String? token]) async {
     try {
-      final response = await http.get(
-        url,
-        headers: {'Authorization': 'Bearer $token'},
-      );
+      // Doğrudan tek rozet için endpoint
+      final url = Uri.parse('$_baseUrl/badges/$badgeId');
+      
+      final headers = token != null 
+          ? {'Authorization': 'Bearer $token'}
+          : <String, String>{};
+      
+      print('Rozet detay isteği yapılıyor: $url');
+      print('Rozet ID: $badgeId');
+      
+      final response = await http.get(url, headers: headers);
+      
+      print('Rozet detay yanıtı: Status: ${response.statusCode}, Body: ${response.body}');
       
       if (response.statusCode == 200) {
         try {
           final data = json.decode(response.body);
+          if (data != null && data is Map<String, dynamic>) {
+            final badge = BadgeModel.fromJson(data);
+            print('Rozet detayı başarıyla alındı: ${badge.name}');
+            return badge;
+          }
+        } catch (e) {
+          print('Rozet detay parse hatası: $e');
+        }
+      } else {
+        print('Rozet detay isteği başarısız: ${response.statusCode}');
+      }
+      
+      // Fallback: Genel rozet listesinden bu ID'yi bulma denemesi
+      try {
+        print('Alternatif: Tüm rozetlerden ID araması yapılıyor...');
+        final allUrl = Uri.parse('$_baseUrl/badges');
+        
+        final allResponse = await http.get(allUrl, headers: headers);
+        
+        if (allResponse.statusCode == 200) {
+          final allData = json.decode(allResponse.body);
           
-          if (data is List) {
-            // Listeden ID'ye göre rozeti bul
-            for (var item in data) {
+          if (allData is List) {
+            for (var item in allData) {
               if (item is Map<String, dynamic> && 
                   item['id'] != null && 
                   item['id'] == badgeId) {
-                return (BadgeModel.fromJson(item), null);
+                print('Rozet genel listede bulundu');
+                return BadgeModel.fromJson(item);
               }
             }
-            return (null, 'Belirtilen ID ile rozet bulunamadı');
-          } else if (data is Map<String, dynamic>) {
-            // Tek bir rozet verisi
-            if (data['id'] == badgeId) {
-              return (BadgeModel.fromJson(data), null);
-            }
-            // Nested data
-            for (final field in ['data', 'badges', 'items', 'results']) {
-              if (data.containsKey(field) && data[field] is List) {
-                List items = data[field] as List;
-                for (var item in items) {
-                  if (item is Map<String, dynamic> && 
-                      item['id'] != null && 
-                      item['id'] == badgeId) {
-                    return (BadgeModel.fromJson(item), null);
-                  }
-                }
-              }
-            }
-            return (null, 'Belirtilen ID ile rozet bulunamadı');
           }
-          
-          return (null, 'Rozet verisi uygun formatta değil');
-        } catch (e) {
-          print('JSON decode hatası: $e');
-          // Fallback badge
-          final fallbackBadge = BadgeModel(
-            id: badgeId,
-            name: 'Rozet #$badgeId',
-            description: 'API yanıtını işlerken bir sorun oluştu.',
-            imageUrl: 'https://cdn-icons-png.flaticon.com/512/1053/1053367.png',
-          );
-          return (fallbackBadge, null);
         }
-      } else {
-        String errorMsg = 'Rozet bilgisi alınamadı';
-        try {
-          final data = json.decode(response.body);
-          if (data is Map && data['detail'] != null) {
-            errorMsg = data['detail'].toString();
-          }
-        } catch (_) {}
-        print('Get badge failed: ${response.statusCode} - ${response.body}');
-        return (null, errorMsg);
+      } catch (e) {
+        print('Alternatif yöntem hatası: $e');
       }
+      
+      // Fallback badge oluştur
+      print('Rozet bilgisi alınamadı, varsayılan oluşturuluyor...');
+      return BadgeModel(
+        id: badgeId,
+        name: 'Rozet #$badgeId',
+        description: 'Bu rozet için detaylı bilgi alınamadı.',
+        imageUrl: 'https://cdn-icons-png.flaticon.com/512/1053/1053367.png',
+      );
     } catch (e) {
-      print('Get badge exception: $e');
-      return (null, 'Bağlantı hatası: $e');
+      print('Rozet detay istisna: $e');
+      return null;
     }
   }
-  
+
   // API test metodu - bağlantı kurulabiliyor mu diye test etmek için
   Future<String> testConnection() async {
     try {

@@ -14,6 +14,11 @@ class BadgeScreen extends GetView<BadgeController> {
         centerTitle: true,
         actions: [
           IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () => Get.toNamed('/my_badges'),
+            tooltip: 'Rozetlerim',
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: controller.loadBadges,
             tooltip: 'Yenile',

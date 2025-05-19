@@ -12,6 +12,8 @@ import '../../screens/flight/flight_binding.dart';
 import '../../screens/badge/badge_screen.dart';
 import '../../screens/badge/badge_details_screen.dart';
 import '../../screens/badge/badge_binding.dart';
+import '../../screens/badge/my_badges_screen.dart';
+import '../../screens/badge/my_badges_controller.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -58,6 +60,13 @@ class AppPages {
     GetPage(
       name: AppRoutes.BADGE_DETAILS,
       page: () => const BadgeDetailsScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.MY_BADGES,
+      page: () => const MyBadgesScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<MyBadgesController>(() => MyBadgesController());
+      }),
     ),
   ];
 }

@@ -12,4 +12,5 @@ abstract class AppRoutes {
   static const FLIGHT_DETAILS = '/flight_details';
   static const BADGES = '/badges';
   static const BADGE_DETAILS = '/badge_details';
+  static const MY_BADGES = '/my_badges';
 }
