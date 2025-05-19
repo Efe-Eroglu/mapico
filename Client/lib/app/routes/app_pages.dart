@@ -17,6 +17,7 @@ import '../../screens/badge/my_badges_controller.dart';
 import '../../screens/leaderboard/leaderboard_screen.dart';
 import '../../screens/leaderboard/leaderboard_binding.dart';
 import 'app_routes.dart';
+import '../../screens/flight/flight_details_binding.dart';
 
 class AppPages {
   static final routes = [
@@ -53,6 +54,7 @@ class AppPages {
     GetPage(
       name: AppRoutes.FLIGHT_DETAILS,
       page: () => const FlightDetailsScreen(),
+      binding: FlightDetailsBinding(),
     ),
     GetPage(
       name: AppRoutes.BADGES,

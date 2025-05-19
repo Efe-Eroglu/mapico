@@ -3,14 +3,16 @@ import '../../core/base/base_controller.dart';
 import 'package:mapico/models/flight_model.dart';
 import 'package:mapico/services/flight_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class FlightController extends BaseController {
   final flights = <FlightModel>[].obs;
-  bool _isLoading = false;
+  final flightStops = <int, List<dynamic>>{}.obs;
+  final badgeDetails = <int, dynamic>{}.obs;
   String? errorMessage;
   bool _isTestMode = false;
 
-  bool get isLoading => _isLoading;
   bool get isTestMode => _isTestMode;
   
   final flightService = FlightService();
@@ -18,15 +20,72 @@ class FlightController extends BaseController {
   @override
   void onInit() {
     super.onInit();
-    loadFlights();
+    fetchFlights();
   }
   
-  Future<void> loadFlights() async {
-    _isLoading = true;
-    errorMessage = null;
-    update();
-    
+  Future<void> fetchBadgeDetails(int badgeId) async {
+    if (badgeDetails.containsKey(badgeId)) return;
+
     try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8000/api/v1/badges/$badgeId'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        badgeDetails[badgeId] = data;
+      }
+    } catch (e) {
+      print('Error fetching badge details: $e');
+    }
+  }
+
+  Future<void> fetchFlightStops() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:8000/api/v1/flight_stops/all'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        
+        // Group stops by flight_id
+        final Map<int, List<dynamic>> groupedStops = {};
+        for (var stop in data) {
+          final flightId = stop['flight_id'];
+          if (!groupedStops.containsKey(flightId)) {
+            groupedStops[flightId] = [];
+          }
+          groupedStops[flightId]!.add(stop);
+        }
+
+        // Sort stops by order within each flight
+        groupedStops.forEach((flightId, stops) {
+          stops.sort((a, b) => (a['order'] ?? 0).compareTo(b['order'] ?? 0));
+        });
+
+        flightStops.value = groupedStops;
+
+        // Fetch badge details for all stops with badges
+        for (var stops in groupedStops.values) {
+          for (var stop in stops) {
+            if (stop['reward_badge'] != null) {
+              await fetchBadgeDetails(stop['reward_badge']);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print('Error fetching flight stops: $e');
+    }
+  }
+
+  Future<void> fetchFlights() async {
+    try {
+      setLoading(true);
+      errorMessage = null;
+      update();
+      
       print('Uçuşları yükleme başladı');
       const storage = FlutterSecureStorage();
       final token = await storage.read(key: 'jwt_token');
@@ -39,6 +98,7 @@ class FlightController extends BaseController {
           print('${flightsData.length} uçuş yüklendi');
           flights.value = flightsData;
           _isTestMode = false;
+          await fetchFlightStops();
         } else if (error != null) {
           print('Uçuşları yükleme hatası: $error');
           errorMessage = error;
@@ -63,7 +123,7 @@ class FlightController extends BaseController {
       // Hata durumunda token olmadan deneyelim
       await loadFlightsWithoutToken();
     } finally {
-      _isLoading = false;
+      setLoading(false);
       update();
     }
   }
@@ -80,6 +140,7 @@ class FlightController extends BaseController {
         _isTestMode = true;
         errorMessage = 'Test modunda çalışıyor (Token kullanılmıyor)';
         update();
+        await fetchFlightStops();
       } else if (error != null) {
         print('TEST hatası: $error');
         // Test modu başarısız, API bağlantı testi yap
@@ -103,7 +164,7 @@ class FlightController extends BaseController {
   }
   
   Future<void> onRefresh() async {
-    await loadFlights();
+    await fetchFlights();
   }
   
   void onFlightTapped(FlightModel flight) {
