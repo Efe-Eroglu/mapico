@@ -50,7 +50,10 @@ class QuickActions extends GetView<HomeController> {
               'Ayarlar',
               Icons.settings,
               Colors.purple,
-              () => Get.toNamed('/settings'),
+              () {
+                print('Ayarlar butonuna tıklandı');
+                Get.toNamed('/settings');
+              },
             ),
             _buildActionCard(
               context,

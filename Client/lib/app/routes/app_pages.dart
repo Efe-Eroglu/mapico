@@ -18,6 +18,8 @@ import '../../screens/leaderboard/leaderboard_screen.dart';
 import '../../screens/leaderboard/leaderboard_binding.dart';
 import 'app_routes.dart';
 import '../../screens/flight/flight_details_binding.dart';
+import '../../screens/settings/settings_screen.dart';
+import '../../screens/settings/settings_controller.dart';
 
 class AppPages {
   static final routes = [
@@ -76,6 +78,13 @@ class AppPages {
       name: AppRoutes.LEADERBOARD,
       page: () => const LeaderboardScreen(),
       binding: LeaderboardBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.SETTINGS,
+      page: () => const SettingsScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<SettingsController>(() => SettingsController());
+      }),
     ),
   ];
 }
