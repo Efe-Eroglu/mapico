@@ -134,34 +134,25 @@ class FlightDetailsScreen extends GetView<FlightDetailsController> {
                                         ),
                                         if (badgeId != null) ...[
                                           const SizedBox(height: 4),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.amber.shade100,
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(
-                                                  Icons.emoji_events,
-                                                  size: 16,
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.emoji_events,
+                                                size: 18,
+                                                color: Colors.amber.shade800,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                badgeDetails != null
+                                                  ? (badgeDetails['name'] ?? 'Rozet Ödülü')
+                                                  : 'Rozet ID: $badgeId',
+                                                style: TextStyle(
                                                   color: Colors.amber.shade800,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
                                                 ),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  badgeDetails?['name'] ?? 'Rozet Ödülü',
-                                                  style: TextStyle(
-                                                    color: Colors.amber.shade800,
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ],
@@ -234,6 +225,11 @@ class FlightDetailsScreen extends GetView<FlightDetailsController> {
           ),
         );
       }),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: controller.claimAllBadgesForFlight,
+        icon: const Icon(Icons.flight_takeoff),
+        label: const Text('Uç'),
+      ),
     );
   }
 } 

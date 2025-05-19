@@ -2,6 +2,9 @@ import 'package:get/get.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mapico/models/flight_model.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:mapico/services/user_badge_service.dart';
+import 'package:flutter/material.dart';
 
 class FlightDetailsController extends GetxController {
   final RxBool isLoading = true.obs;
@@ -69,6 +72,45 @@ class FlightDetailsController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> claimAllBadgesForFlight() async {
+    try {
+      final badgeIds = flightStops
+        .where((stop) => stop['reward_badge'] != null)
+        .map((stop) => stop['reward_badge'] as int)
+        .toList();
+      if (badgeIds.isEmpty) {
+        Get.snackbar('Bilgi', 'Bu uçuşta kazanılacak rozet yok.', snackPosition: SnackPosition.BOTTOM);
+        return;
+      }
+      const storage = FlutterSecureStorage();
+      final token = await storage.read(key: 'jwt_token');
+      if (token == null) {
+        Get.snackbar('Hata', 'Oturum bilginiz bulunamadı. Lütfen tekrar giriş yapın.', snackPosition: SnackPosition.BOTTOM);
+        return;
+      }
+      final userBadgeService = UserBadgeService();
+      int successCount = 0;
+      for (final badgeId in badgeIds) {
+        final (success, message) = await userBadgeService.assignBadge(badgeId, token);
+        if (success) {
+          successCount++;
+        } else {
+          print('Rozet atama hatası: $message');
+        }
+      }
+      if (successCount > 0) {
+        Get.snackbar('Başarılı', '$successCount rozet başarıyla eklendi!', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.green.shade100, colorText: Colors.green.shade800, margin: const EdgeInsets.all(16), duration: const Duration(seconds: 3));
+        await Future.delayed(const Duration(milliseconds: 800));
+        Get.toNamed('/my_badges');
+      } else {
+        Get.snackbar('Hata', 'Rozetler eklenemedi.', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red.shade100, colorText: Colors.red.shade800, margin: const EdgeInsets.all(16), duration: const Duration(seconds: 3));
+      }
+    } catch (e) {
+      print('Rozetler eklenirken hata: $e');
+      Get.snackbar('Hata', 'Rozetler eklenirken bir hata oluştu.', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red.shade100, colorText: Colors.red.shade800, margin: const EdgeInsets.all(16), duration: const Duration(seconds: 3));
     }
   }
 } 
