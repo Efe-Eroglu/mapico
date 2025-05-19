@@ -14,6 +14,8 @@ import '../../screens/badge/badge_details_screen.dart';
 import '../../screens/badge/badge_binding.dart';
 import '../../screens/badge/my_badges_screen.dart';
 import '../../screens/badge/my_badges_controller.dart';
+import '../../screens/leaderboard/leaderboard_screen.dart';
+import '../../screens/leaderboard/leaderboard_binding.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -67,6 +69,11 @@ class AppPages {
       binding: BindingsBuilder(() {
         Get.lazyPut<MyBadgesController>(() => MyBadgesController());
       }),
+    ),
+    GetPage(
+      name: AppRoutes.LEADERBOARD,
+      page: () => const LeaderboardScreen(),
+      binding: LeaderboardBinding(),
     ),
   ];
 }

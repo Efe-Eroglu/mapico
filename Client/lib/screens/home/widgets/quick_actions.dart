@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../home_controller.dart';
+import '../../../app/routes/app_routes.dart';
 
 class QuickActions extends GetView<HomeController> {
   const QuickActions({Key? key}) : super(key: key);
@@ -71,6 +72,13 @@ class QuickActions extends GetView<HomeController> {
               Icons.military_tech,
               Colors.amber,
               () => Get.toNamed('/badges'),
+            ),
+            _buildActionCard(
+              context,
+              'Leaderboards',
+              Icons.leaderboard,
+              Colors.amber,
+              () => Get.toNamed(AppRoutes.LEADERBOARD),
             ),
           ],
         ),
