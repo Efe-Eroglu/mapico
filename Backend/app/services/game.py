@@ -67,14 +67,26 @@ def get_all_games(db: Session) -> list[GameRead]:
             detail="No games found"
         )
 
-    # Şifrelenmiş verileri deşifre edip döndürüyoruz
-    return [
-        GameRead(
+    result = []
+    for db_game in db_games:
+        try:
+            decrypted_title = encryption_service.decrypt(db_game.title)
+        except Exception:
+            decrypted_title = db_game.title
+
+        try:
+            decrypted_description = encryption_service.decrypt(db_game.description) if db_game.description else None
+        except Exception:
+            decrypted_description = db_game.description
+
+        result.append(GameRead(
             id=db_game.id,
             name=db_game.name,
-            title=encryption_service.decrypt(db_game.title),
-            description=encryption_service.decrypt(db_game.description) if db_game.description else None,
+            title=decrypted_title,
+            description=decrypted_description,
             created_at=db_game.created_at
-        ) for db_game in db_games
-    ]
+        ))
+
+    return result
+
     
