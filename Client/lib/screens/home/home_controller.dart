@@ -96,10 +96,10 @@ class HomeController extends BaseController {
       case 1:
         Get.toNamed(AppRoutes.GAME1_DETAIL, arguments: game);
         break;
-      case 2:
+      case 3:
         Get.toNamed(AppRoutes.GAME2_DETAIL, arguments: game);
         break;
-      case 3:
+      case 4:
         Get.toNamed(AppRoutes.GAME3_DETAIL, arguments: game);
         break;
       default:
