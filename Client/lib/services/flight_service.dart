@@ -1,15 +1,17 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mapico/models/flight_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class FlightService {
   // API URL - hem localhost hem de emülatör (10.0.2.2) formatını desteklesin
   static String get _baseUrl {
-    // Önce 10.0.2.2 ile denesin (Android emülatör)
-    const emulatorUrl = 'http://34.31.239.252:8000/api/v1';
+    // Emülatör için IP adresi (Android emülatör)
+    final emulatorUrl = dotenv.env['API_BASE_URL']!;
     // Alternatif olarak doğrudan IP adresi
-    const directUrl = 'http://34.31.239.252:8000/api/v1';
+    final directUrl = dotenv.env['API_BASE_URL']!;
 
+    // Emülatör URL'ini kullan
     return emulatorUrl;
   }
 

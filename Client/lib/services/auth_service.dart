@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mapico/models/user_model.dart';
 import 'package:mapico/models/avatar_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {
-  static const String _baseUrl = 'http://34.31.239.252:8000/api/v1';
+  static final String _baseUrl = dotenv.env['API_BASE_URL']!;
 
   Future<String?> login({
     required String username,

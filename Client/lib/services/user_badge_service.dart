@@ -4,12 +4,13 @@ import 'package:http/http.dart' as http;
 import 'package:mapico/models/user_badge_model.dart';
 import 'package:mapico/models/badge_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class UserBadgeService {
   // API URL değişkeni - hem localhost hem de emülatör için
   static String get _baseUrl {
     // Android emülatörü için doğru URL (10.0.2.2 localhost'a denk gelir)
-    const emulatorUrl = 'http://34.31.239.252:8000/api/v1';
+    final emulatorUrl = dotenv.env['API_BASE_URL']!;
     return emulatorUrl;
   }
 

@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mapico/models/badge_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class BadgeService {
   // API URL değişkeni - hem localhost hem de emülatör için
   static String get _baseUrl {
     // Emülatör için IP adresi (Android emülatör)
-    const emulatorUrl = 'http://34.31.239.252:8000/api/v1';
+    final emulatorUrl = dotenv.env['API_BASE_URL']!;
     // Alternatif olarak doğrudan IP adresi
-    const directUrl = 'http://34.31.239.252:8000/api/v1';
+    final directUrl = dotenv.env['API_BASE_URL']!;
 
     // Emülatör URL'ini kullan
     return emulatorUrl;

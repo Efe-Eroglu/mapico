@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mapico/models/game_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GameService {
-  static const String _baseUrl = 'http://34.31.239.252:8000/api/v1';
+  static final String _baseUrl = dotenv.env['API_BASE_URL']!;
 
   // Get all games
   Future<(List<GameModel>?, String?)> getAllGames(String token) async {
