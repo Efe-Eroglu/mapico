@@ -6,7 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class UserEquipmentService {
   // 10.0.2.2, Android emülatörlerinde localhost'a denk gelir
   // Gerçek bir cihazda test ediyorsanız bilgisayarınızın gerçek IP adresini kullanın (ör: 192.168.1.X)
-  final String baseUrl = 'http://10.0.2.2:8000/api/v1'; 
+  final String baseUrl = 'http://34.31.239.252:8000/api/v1';
   final storage = const FlutterSecureStorage();
 
   Future<String?> _getToken() async {
@@ -34,10 +34,14 @@ class UserEquipmentService {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        final equipments = data.map((json) => UserEquipmentModel.fromJson(json)).toList();
+        final equipments =
+            data.map((json) => UserEquipmentModel.fromJson(json)).toList();
         return (equipments, null);
       } else {
-        return (null, 'Ekipmanlarınız yüklenirken bir hata oluştu - Status: ${response.statusCode}');
+        return (
+          null,
+          'Ekipmanlarınız yüklenirken bir hata oluştu - Status: ${response.statusCode}'
+        );
       }
     } catch (e) {
       print('getUserEquipments hata detayı: $e');
@@ -46,20 +50,22 @@ class UserEquipmentService {
   }
 
   // Kullanıcıya ekipman ekle
-  Future<(UserEquipmentModel?, String?)> addUserEquipment(int equipmentId) async {
+  Future<(UserEquipmentModel?, String?)> addUserEquipment(
+      int equipmentId) async {
     try {
       // Önce mevcut ekipmanları kontrol et
       final (userEquipments, error) = await getUserEquipments();
-      
+
       if (error != null) {
         return (null, error);
       }
-      
+
       // Ekipman zaten ekli mi kontrol et
-      if (userEquipments != null && userEquipments.any((ue) => ue.equipmentId == equipmentId)) {
+      if (userEquipments != null &&
+          userEquipments.any((ue) => ue.equipmentId == equipmentId)) {
         return (null, 'Bu ekipman zaten ekipmanlarınıza eklenmiş');
       }
-      
+
       final token = await _getToken();
       if (token == null) {
         return (null, 'Oturum bulunamadı');
@@ -68,7 +74,7 @@ class UserEquipmentService {
       final requestBody = json.encode({
         'equipment_id': equipmentId,
       });
-      
+
       print('addUserEquipment request body: $requestBody');
 
       final response = await http.post(
@@ -88,7 +94,10 @@ class UserEquipmentService {
         final userEquipment = UserEquipmentModel.fromJson(data);
         return (userEquipment, null);
       } else {
-        return (null, 'Ekipman eklenirken bir hata oluştu - Status: ${response.statusCode}');
+        return (
+          null,
+          'Ekipman eklenirken bir hata oluştu - Status: ${response.statusCode}'
+        );
       }
     } catch (e) {
       print('addUserEquipment hata detayı: $e');
@@ -124,4 +133,4 @@ class UserEquipmentService {
       return 'Bağlantı hatası: $e';
     }
   }
-} 
+}

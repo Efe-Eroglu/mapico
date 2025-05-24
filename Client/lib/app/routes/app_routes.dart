@@ -14,4 +14,8 @@ abstract class AppRoutes {
   static const BADGE_DETAILS = '/badge_details';
   static const MY_BADGES = '/my_badges';
   static const LEADERBOARD = '/leaderboard';
+  static const GAME_DETAIL = '/game/:id';
+  static const GAME1_DETAIL = '/game1';
+  static const GAME2_DETAIL = '/game2';
+  static const GAME3_DETAIL = '/game3';
 }

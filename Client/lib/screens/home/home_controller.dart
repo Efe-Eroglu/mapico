@@ -6,6 +6,7 @@ import 'package:mapico/models/game_model.dart';
 import 'package:mapico/services/auth_service.dart';
 import 'package:mapico/services/game_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../../app/routes/app_routes.dart';
 
 class HomeController extends BaseController {
   // Kullanıcı bilgileri
@@ -13,7 +14,7 @@ class HomeController extends BaseController {
   final userRole = 'Kullanıcı'.obs;
   final user = Rxn<UserModel>();
   final avatar = Rxn<AvatarModel>();
-  
+
   // Oyun bilgileri
   final games = <GameModel>[].obs;
   final isGamesLoading = false.obs;
@@ -33,7 +34,8 @@ class HomeController extends BaseController {
       if (token != null) {
         final authService = AuthService();
         final (userData, userError) = await authService.getCurrentUser(token);
-        final (avatarData, avatarError) = await authService.getUserAvatar(token);
+        final (avatarData, avatarError) =
+            await authService.getUserAvatar(token);
         if (userData != null) {
           user.value = userData;
           userName.value = userData.fullName;
@@ -49,7 +51,7 @@ class HomeController extends BaseController {
       setLoading(false);
     }
   }
-  
+
   Future<void> loadGames() async {
     isGamesLoading.value = true;
     try {
@@ -87,9 +89,23 @@ class HomeController extends BaseController {
   void onAddPressed() {
     Get.toNamed('/create');
   }
-  
+
   void onGameTapped(GameModel game) {
-    // TODO: Implement game detail or game start screen navigation
-    Get.toNamed('/game/${game.id}', arguments: game);
+    // Oyun id'sine göre ilgili detay sayfasına yönlendir
+    switch (game.id) {
+      case 1:
+        Get.toNamed(AppRoutes.GAME1_DETAIL, arguments: game);
+        break;
+      case 2:
+        Get.toNamed(AppRoutes.GAME2_DETAIL, arguments: game);
+        break;
+      case 3:
+        Get.toNamed(AppRoutes.GAME3_DETAIL, arguments: game);
+        break;
+      default:
+        Get.toNamed(
+            AppRoutes.GAME_DETAIL.replaceFirst(':id', game.id.toString()),
+            arguments: game);
+    }
   }
-} 
+}

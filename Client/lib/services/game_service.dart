@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:mapico/models/game_model.dart';
 
 class GameService {
-  static const String _baseUrl = 'http://10.0.2.2:8000/api/v1';
+  static const String _baseUrl = 'http://34.31.239.252:8000/api/v1';
 
   // Get all games
   Future<(List<GameModel>?, String?)> getAllGames(String token) async {
@@ -12,7 +12,7 @@ class GameService {
       url,
       headers: {'Authorization': 'Bearer $token'},
     );
-    
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       if (data is List) {
@@ -41,7 +41,7 @@ class GameService {
       url,
       headers: {'Authorization': 'Bearer $token'},
     );
-    
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       return (GameModel.fromJson(data), null);
@@ -57,4 +57,4 @@ class GameService {
       return (null, errorMsg);
     }
   }
-} 
+}

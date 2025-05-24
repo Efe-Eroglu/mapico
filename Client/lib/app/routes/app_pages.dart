@@ -20,6 +20,10 @@ import 'app_routes.dart';
 import '../../screens/flight/flight_details_binding.dart';
 import '../../screens/settings/settings_screen.dart';
 import '../../screens/settings/settings_controller.dart';
+import '../../screens/game_detail/game_detail_page.dart';
+import '../../screens/game_detail/game1_detail_page.dart';
+import '../../screens/game_detail/game2_detail_page.dart';
+import '../../screens/game_detail/game3_detail_page.dart';
 
 class AppPages {
   static final routes = [
@@ -86,6 +90,21 @@ class AppPages {
         Get.lazyPut<SettingsController>(() => SettingsController());
       }),
     ),
+    GetPage(
+      name: AppRoutes.GAME_DETAIL,
+      page: () => const GameDetailPage(),
+    ),
+    GetPage(
+      name: AppRoutes.GAME1_DETAIL,
+      page: () => Game1DetailPage(),
+    ),
+    GetPage(
+      name: AppRoutes.GAME2_DETAIL,
+      page: () => const Game2DetailPage(),
+    ),
+    GetPage(
+      name: AppRoutes.GAME3_DETAIL,
+      page: () => const Game3DetailPage(),
+    ),
   ];
 }
-

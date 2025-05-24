@@ -4,7 +4,7 @@ import 'package:mapico/models/user_model.dart';
 import 'package:mapico/models/avatar_model.dart';
 
 class AuthService {
-  static const String _baseUrl = 'http://10.0.2.2:8000/api/v1';
+  static const String _baseUrl = 'http://34.31.239.252:8000/api/v1';
 
   Future<String?> login({
     required String username,
@@ -24,7 +24,7 @@ class AuthService {
       print('Login failed: \\${response.statusCode} - \\${response.body}');
       return null;
     }
-  } 
+  }
 
   Future<(UserModel?, String?)> register({
     required String email,
