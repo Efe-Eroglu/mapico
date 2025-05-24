@@ -5,6 +5,10 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:mapico/services/auth_service.dart';
+import 'package:mapico/models/game_model.dart';
 
 class Game1DetailPage extends StatefulWidget {
   @override
@@ -145,9 +149,14 @@ class _Game1DetailPageState extends State<Game1DetailPage> {
     ),
   ];
 
+  GameModel? currentGame;
+
   @override
   void initState() {
     super.initState();
+    if (Get.arguments != null && Get.arguments is GameModel) {
+      currentGame = Get.arguments as GameModel;
+    }
     _initializeGame();
   }
 
@@ -165,7 +174,7 @@ class _Game1DetailPageState extends State<Game1DetailPage> {
     try {
       await Future.wait([
         effectAudioCache.load('pop.mp3'),
-        effectAudioCache.load('yanlis.mp3'),
+        effectAudioCache.load('wrong.mp3'),
         effectAudioCache.load('success.mp3'),
       ]);
     } catch (e) {
@@ -397,15 +406,15 @@ class _Game1DetailPageState extends State<Game1DetailPage> {
     }
   }
 
-  Future<void> sendScoreToServer({
+  Future<void> sendGameSessionToServer({
     required int gameId,
-    required String userId,
+    required int userId,
     required int score,
     required bool success,
     required DateTime startedAt,
     required DateTime endedAt,
   }) async {
-    final url = Uri.parse('http://34.31.239.252:8000/api/v1/game_sessions');
+    final url = Uri.parse('${dotenv.env['API_BASE_URL']}/game_sessions');
     final body = {
       "game_id": gameId,
       "user_id": userId,
@@ -414,6 +423,7 @@ class _Game1DetailPageState extends State<Game1DetailPage> {
       "started_at": startedAt.toIso8601String(),
       "ended_at": endedAt.toIso8601String(),
     };
+
     try {
       final response = await http.post(
         url,
@@ -421,12 +431,12 @@ class _Game1DetailPageState extends State<Game1DetailPage> {
         body: jsonEncode(body),
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print("Skor başarıyla gönderildi!");
+        print("Oyun oturumu başarıyla kaydedildi!");
       } else {
-        print("Hata oluştu: \\${response.statusCode} - \\${response.body}");
+        print("Hata oluştu: ${response.statusCode} - ${response.body}");
       }
     } catch (e) {
-      print("İstek gönderilemedi: \\${e}");
+      print("İstek gönderilemedi: $e");
     }
   }
 
@@ -438,15 +448,32 @@ class _Game1DetailPageState extends State<Game1DetailPage> {
     setState(() {
       isGameStarted = false;
     });
-    // Skoru gönder
-    await sendScoreToServer(
-      gameId: 1,
-      userId: 'test_user',
-      score: score,
-      success: score >= 100,
-      startedAt: _gameStartTime!,
-      endedAt: DateTime.now(),
-    );
+    // Dinamik userId çek
+    int? userId;
+    try {
+      const storage = FlutterSecureStorage();
+      final token = await storage.read(key: 'jwt_token');
+      if (token != null) {
+        final authService = AuthService();
+        final (user, _) = await authService.getCurrentUser(token);
+        userId = user?.id;
+      }
+    } catch (e) {
+      print('Kullanıcı id alınamadı: $e');
+    }
+    final gameId = currentGame?.id;
+    if (userId != null && gameId != null) {
+      await sendGameSessionToServer(
+        gameId: gameId,
+        userId: userId,
+        score: score,
+        success: score >= 100,
+        startedAt: _gameStartTime!,
+        endedAt: DateTime.now(),
+      );
+    } else {
+      print('Kullanıcı id veya gameId bulunamadı, skor gönderilemedi.');
+    }
     showDialog(
       context: context,
       barrierDismissible: false,
