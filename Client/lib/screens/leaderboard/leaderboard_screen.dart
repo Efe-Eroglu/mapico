@@ -62,222 +62,233 @@ class LeaderboardScreen extends GetView<LeaderboardController> {
               ),
               const Divider(height: 1),
             ],
-            // Leaderboard table (filtered by selected game)
+            
+            // Leaderboard content
             Expanded(
               child: controller.isLoading.value
-                  ? const Center(child: CircularProgressIndicator())
-                  : controller.leaderboardData.isEmpty
-                      ? const Center(child: Text('Veri yok'))
-                      : ListView(
+                ? const Center(child: CircularProgressIndicator())
+                : controller.leaderboardData.isEmpty
+                  ? const Center(child: Text('Bu oyun için veri bulunmuyor'))
+                  : _buildLeaderboardContent(context),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildLeaderboardContent(BuildContext context) {
+    return ListView(
+      children: [
+        // Top Scorer Highlight
+        if (controller.leaderboardData.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).primaryColor,
+                      Theme.of(context).primaryColor.withOpacity(0.8),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.emoji_events, color: Colors.amber, size: 40),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'En Yüksek Toplam Puan',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            controller.leaderboardData[0]['user_name'] ?? 'İsimsiz Kullanıcı',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${controller.leaderboardData[0]['game_count'] ?? 1} oyun',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${controller.leaderboardData[0]['score'] ?? 0}',
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+        
+        // Score Table
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                // Table Header
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12),
+                    ),
+                  ),
+                  child: const Row(
+                    children: [
+                      SizedBox(width: 50, child: Text('Sıra', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                      Expanded(child: Text('Kullanıcı', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                      SizedBox(width: 100, child: Text('Toplam Puan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                      SizedBox(width: 100, child: Text('Oyun Sayısı', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                    ],
+                  ),
+                ),
+                
+                // Table Body
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: controller.leaderboardData.length,
+                  itemBuilder: (context, index) {
+                    final item = controller.leaderboardData[index];
+                    final isTopThree = index < 3;
+                    
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: isTopThree 
+                            ? Theme.of(context).primaryColor.withOpacity(0.1)
+                            : index.isEven 
+                                ? Colors.grey.shade50 
+                                : Colors.white,
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Colors.grey.shade200,
+                            width: 1,
+                          ),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        child: Row(
                           children: [
-                            // Top Scorer Highlight
-                            if (controller.leaderboardData.isNotEmpty) ...[
-                              Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Card(
-                                  elevation: 4,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Theme.of(context).primaryColor,
-                                          Theme.of(context).primaryColor.withOpacity(0.8),
-                                        ],
-                                      ),
-                                      borderRadius: BorderRadius.circular(12),
+                            // Rank
+                            SizedBox(
+                              width: 50,
+                              child: Row(
+                                children: [
+                                  if (isTopThree)
+                                    Icon(
+                                      index == 0
+                                          ? Icons.emoji_events
+                                          : index == 1
+                                              ? Icons.workspace_premium
+                                              : Icons.star,
+                                      color: Theme.of(context).primaryColor,
+                                      size: 20,
                                     ),
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.emoji_events, color: Colors.amber, size: 40),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              const Text(
-                                                'En Yüksek Skor',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                controller.leaderboardData[0]['user_name'] ?? 'İsimsiz Kullanıcı',
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 8,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(20),
-                                          ),
-                                          child: Text(
-                                            '${controller.leaderboardData[0]['score'] ?? 0}',
-                                            style: TextStyle(
-                                              color: Theme.of(context).primaryColor,
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '${index + 1}',
+                                    style: TextStyle(
+                                      fontWeight: isTopThree ? FontWeight.bold : FontWeight.normal,
+                                      color: isTopThree ? Theme.of(context).primaryColor : Colors.black87,
                                     ),
                                   ),
+                                ],
+                              ),
+                            ),
+                            // Username
+                            Expanded(
+                              child: Text(
+                                item['user_name'] ?? 'İsimsiz Kullanıcı',
+                                style: TextStyle(
+                                  fontWeight: isTopThree ? FontWeight.bold : FontWeight.normal,
+                                  color: isTopThree ? Theme.of(context).primaryColor : Colors.black87,
                                 ),
                               ),
-                            ],
-                            // Score Table
-                            Expanded(
-                              child: SingleChildScrollView(
-                                padding: const EdgeInsets.all(16),
-                                child: Card(
-                                  elevation: 4,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      // Table Header
-                                      Container(
-                                        padding: const EdgeInsets.all(16),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).primaryColor,
-                                          borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(12),
-                                            topRight: Radius.circular(12),
-                                          ),
-                                        ),
-                                        child: const Row(
-                                          children: [
-                                            SizedBox(width: 50, child: Text('Sıra', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                                            Expanded(child: Text('Kullanıcı', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                                            SizedBox(width: 100, child: Text('Skor', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                                            SizedBox(width: 100, child: Text('Süre', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
-                                          ],
-                                        ),
-                                      ),
-                                      // Table Body
-                                      ListView.builder(
-                                        shrinkWrap: true,
-                                        physics: const NeverScrollableScrollPhysics(),
-                                        itemCount: controller.leaderboardData.length,
-                                        itemBuilder: (context, index) {
-                                          final item = controller.leaderboardData[index];
-                                          final isTopThree = index < 3;
-                                          
-                                          return Container(
-                                            decoration: BoxDecoration(
-                                              color: isTopThree 
-                                                  ? Theme.of(context).primaryColor.withOpacity(0.1)
-                                                  : index.isEven 
-                                                      ? Colors.grey.shade50 
-                                                      : Colors.white,
-                                              border: Border(
-                                                bottom: BorderSide(
-                                                  color: Colors.grey.shade200,
-                                                  width: 1,
-                                                ),
-                                              ),
-                                            ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                              child: Row(
-                                                children: [
-                                                  // Rank
-                                                  SizedBox(
-                                                    width: 50,
-                                                    child: Row(
-                                                      children: [
-                                                        if (isTopThree)
-                                                          Icon(
-                                                            index == 0
-                                                                ? Icons.emoji_events
-                                                                : index == 1
-                                                                    ? Icons.workspace_premium
-                                                                    : Icons.star,
-                                                            color: Theme.of(context).primaryColor,
-                                                            size: 20,
-                                                          ),
-                                                        const SizedBox(width: 8),
-                                                        Text(
-                                                          '${index + 1}',
-                                                          style: TextStyle(
-                                                            fontWeight: isTopThree ? FontWeight.bold : FontWeight.normal,
-                                                            color: isTopThree ? Theme.of(context).primaryColor : Colors.black87,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  // Username
-                                                  Expanded(
-                                                    child: Text(
-                                                      item['user_name'] ?? 'İsimsiz Kullanıcı',
-                                                      style: TextStyle(
-                                                        fontWeight: isTopThree ? FontWeight.bold : FontWeight.normal,
-                                                        color: isTopThree ? Theme.of(context).primaryColor : Colors.black87,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  // Score
-                                                  SizedBox(
-                                                    width: 100,
-                                                    child: Text(
-                                                      '${item['score'] ?? 0}',
-                                                      style: TextStyle(
-                                                        fontWeight: isTopThree ? FontWeight.bold : FontWeight.normal,
-                                                        color: isTopThree ? Theme.of(context).primaryColor : Colors.black87,
-                                                      ),
-                                                      textAlign: TextAlign.center,
-                                                    ),
-                                                  ),
-                                                  // Duration
-                                                  SizedBox(
-                                                    width: 100,
-                                                    child: Text(
-                                                      _calculateDuration(
-                                                        item['started_at'] ?? '',
-                                                        item['ended_at'] ?? '',
-                                                      ),
-                                                      style: TextStyle(
-                                                        color: Colors.grey.shade600,
-                                                        fontSize: 12,
-                                                      ),
-                                                      textAlign: TextAlign.center,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
+                            ),
+                            // Score
+                            SizedBox(
+                              width: 100,
+                              child: Text(
+                                '${item['score'] ?? 0}',
+                                style: TextStyle(
+                                  fontWeight: isTopThree ? FontWeight.bold : FontWeight.normal,
+                                  color: isTopThree ? Theme.of(context).primaryColor : Colors.black87,
                                 ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            // Game Count
+                            SizedBox(
+                              width: 100,
+                              child: Text(
+                                '${item['game_count'] ?? 1}',
+                                style: TextStyle(
+                                  color: isTopThree ? Theme.of(context).primaryColor : Colors.grey.shade600,
+                                  fontSize: 14,
+                                  fontWeight: isTopThree ? FontWeight.bold : FontWeight.normal,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
                             ),
                           ],
                         ),
-              ),
-          ],
-        );
-      }),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 } 
