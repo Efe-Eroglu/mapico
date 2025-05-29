@@ -104,7 +104,7 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.GAME3_DETAIL,
-      page: () => const Game3DetailPage(),
+      page: () => Game3DetailPage(),
     ),
   ];
 }
