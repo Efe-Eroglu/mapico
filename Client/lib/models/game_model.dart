@@ -4,12 +4,14 @@ class GameModel {
   final String title;
   final String? description;
   final DateTime createdAt;
+  final String? code; // Oyun kodu
 
   GameModel({
     required this.id,
     required this.name,
     required this.title,
     this.description,
+    this.code,
     required this.createdAt,
   });
 
@@ -19,6 +21,7 @@ class GameModel {
       name: json['name'],
       title: json['title'],
       description: json['description'],
+      code: json['code'],
       createdAt: DateTime.parse(json['created_at']),
     );
   }
@@ -29,7 +32,8 @@ class GameModel {
       'name': name,
       'title': title,
       'description': description,
+      'code': code,
       'created_at': createdAt.toIso8601String(),
     };
   }
-} 
+}

@@ -1,15 +1,16 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mapico/models/badge_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class BadgeService {
   // API URL değişkeni - hem localhost hem de emülatör için
   static String get _baseUrl {
     // Emülatör için IP adresi (Android emülatör)
-    const emulatorUrl = 'http://10.0.2.2:8000/api/v1';
-    // Alternatif olarak doğrudan IP adresi  
-    const directUrl = 'http://127.0.0.1:8000/api/v1';
-    
+    final emulatorUrl = dotenv.env['API_BASE_URL']!;
+    // Alternatif olarak doğrudan IP adresi
+    final directUrl = dotenv.env['API_BASE_URL']!;
+
     // Emülatör URL'ini kullan
     return emulatorUrl;
   }
@@ -17,36 +18,39 @@ class BadgeService {
   // Tüm rozetleri getir
   Future<(List<BadgeModel>?, String?)> getAllBadges([String? token]) async {
     final url = Uri.parse('$_baseUrl/badges');
-    
+
     try {
       print('Badge API isteği yapılıyor: $url');
-      if (token != null) print('Token ile istek yapılıyor');
-      else print('Token olmadan istek yapılıyor');
-      
-      final headers = token != null 
+      if (token != null)
+        print('Token ile istek yapılıyor');
+      else
+        print('Token olmadan istek yapılıyor');
+
+      final headers = token != null
           ? {'Authorization': 'Bearer $token'}
           : <String, String>{};
-      
+
       final response = await http.get(url, headers: headers);
-      
-      print('Badge API yanıtı: Status: ${response.statusCode}, Body: ${response.body}');
-      
+
+      print(
+          'Badge API yanıtı: Status: ${response.statusCode}, Body: ${response.body}');
+
       if (response.statusCode == 200) {
         // API içerik kontrolü
         if (response.body.isEmpty) {
           print('API yanıtı boş');
           return (<BadgeModel>[], null); // Boş liste döndür, error yok
         }
-        
+
         try {
           final dynamic data = json.decode(response.body);
-          
+
           // Data null kontrolü
           if (data == null) {
             print('API yanıtı null');
             return (_createFallbackBadges(), null);
           }
-          
+
           // Burada direkt veriyi kontrol edelim
           if (data is List) {
             // Liste döndüyse, her öğeyi BadgeModel'e dönüştür
@@ -61,7 +65,7 @@ class BadgeService {
                 // Hatalı öğeyi atla ve devam et
               }
             }
-            
+
             print('${badges.length} rozet başarıyla yüklendi');
             if (badges.isEmpty && data.isNotEmpty) {
               // Liste doluydu ama hiçbir rozet parse edilemedi
@@ -73,13 +77,13 @@ class BadgeService {
             // Eğer veri doğrudan bir liste olmayıp iç içe bir objeyse
             // "data", "badges", "items" gibi yaygın alanları kontrol edelim
             Map<String, dynamic> jsonMap = data as Map<String, dynamic>;
-            
+
             // Yaygın kullanılan alan adlarını kontrol et
             for (final field in ['data', 'badges', 'items', 'results']) {
               if (jsonMap.containsKey(field) && jsonMap[field] is List) {
                 List<dynamic> itemsList = jsonMap[field] as List;
                 final badges = <BadgeModel>[];
-                
+
                 for (var item in itemsList) {
                   try {
                     if (item != null && item is Map<String, dynamic>) {
@@ -89,14 +93,14 @@ class BadgeService {
                     print('Nested liste parse hatası: $e');
                   }
                 }
-                
+
                 print('${badges.length} rozet iç listeden başarıyla yüklendi');
                 if (badges.isNotEmpty) {
                   return (badges, null);
                 }
               }
             }
-            
+
             // Tek bir rozet döndürülmüşse
             try {
               final badge = BadgeModel.fromJson(jsonMap);
@@ -116,29 +120,30 @@ class BadgeService {
           print('JSON decode hatası: $e');
           // JSON decode edilemese bile, içeriği manuel olarak ayrıştırmayı deneyelim
           final rawData = response.body;
-          
+
           try {
             // Raw response'u farklı şekillerde ayrıştırma denemeleri
-            if (rawData.contains('\"name\"') || rawData.contains('\"icon_url\"')) {
+            if (rawData.contains('\"name\"') ||
+                rawData.contains('\"icon_url\"')) {
               try {
                 // Manuel string ayrıştırma
                 String name = 'Adsız Rozet';
                 String iconUrl = '';
-                
+
                 // İsim çıkarma
                 final nameRegex = RegExp(r'"name"\s*:\s*"([^"]+)"');
                 final nameMatch = nameRegex.firstMatch(rawData);
                 if (nameMatch != null && nameMatch.groupCount >= 1) {
                   name = nameMatch.group(1) ?? name;
                 }
-                
+
                 // Icon URL çıkarma
                 final iconRegex = RegExp(r'"icon_url"\s*:\s*"([^"]+)"');
                 final iconMatch = iconRegex.firstMatch(rawData);
                 if (iconMatch != null && iconMatch.groupCount >= 1) {
                   iconUrl = iconMatch.group(1) ?? '';
                 }
-                
+
                 // Alternatif URL alanı
                 if (iconUrl.isEmpty) {
                   final imgRegex = RegExp(r'"image_url"\s*:\s*"([^"]+)"');
@@ -147,7 +152,7 @@ class BadgeService {
                     iconUrl = imgMatch.group(1) ?? '';
                   }
                 }
-                
+
                 // Alternatif URL alanı 2
                 if (iconUrl.isEmpty) {
                   final imgRegex = RegExp(r'"icon"\s*:\s*"([^"]+)"');
@@ -156,7 +161,7 @@ class BadgeService {
                     iconUrl = imgMatch.group(1) ?? '';
                   }
                 }
-                
+
                 // Açıklama çıkarma
                 String description = '';
                 final descRegex = RegExp(r'"description"\s*:\s*"([^"]+)"');
@@ -168,15 +173,17 @@ class BadgeService {
                 final badge = BadgeModel(
                   name: name,
                   imageUrl: iconUrl,
-                  description: description.isNotEmpty ? description : 'API yanıtından manuel çıkarıldı',
+                  description: description.isNotEmpty
+                      ? description
+                      : 'API yanıtından manuel çıkarıldı',
                 );
-                
+
                 return (<BadgeModel>[badge], null);
               } catch (e) {
                 print('Manuel ayrıştırma hatası: $e');
               }
             }
-            
+
             // Hiçbir yöntem başarılı olmazsa, test rozeti döndür
             return (_createFallbackBadges(), null);
           } catch (e) {
@@ -185,7 +192,8 @@ class BadgeService {
           }
         }
       } else {
-        String errorMsg = 'Rozet listesi alınamadı: HTTP ${response.statusCode}';
+        String errorMsg =
+            'Rozet listesi alınamadı: HTTP ${response.statusCode}';
         try {
           final data = json.decode(response.body);
           if (data is Map && data['detail'] != null) {
@@ -194,7 +202,8 @@ class BadgeService {
         } catch (e) {
           print('API yanıtı JSON formatında değil: ${response.body}');
         }
-        print('Get all badges failed: ${response.statusCode} - ${response.body}');
+        print(
+            'Get all badges failed: ${response.statusCode} - ${response.body}');
         return (null, errorMsg);
       }
     } catch (e) {
@@ -207,9 +216,10 @@ class BadgeService {
   List<BadgeModel> _createFallbackBadges() {
     return <BadgeModel>[
       BadgeModel(
-        id: 999, 
-        name: 'Test Rozeti', 
-        description: 'API yanıtını işlerken bir sorun oluştuğu için bu test rozeti gösteriliyor.',
+        id: 999,
+        name: 'Test Rozeti',
+        description:
+            'API yanıtını işlerken bir sorun oluştuğu için bu test rozeti gösteriliyor.',
         imageUrl: 'https://cdn-icons-png.flaticon.com/512/1053/1053367.png',
         category: 'Test',
         pointValue: 5,
@@ -222,18 +232,19 @@ class BadgeService {
     try {
       // Doğrudan tek rozet için endpoint
       final url = Uri.parse('$_baseUrl/badges/$badgeId');
-      
-      final headers = token != null 
+
+      final headers = token != null
           ? {'Authorization': 'Bearer $token'}
           : <String, String>{};
-      
+
       print('Rozet detay isteği yapılıyor: $url');
       print('Rozet ID: $badgeId');
-      
+
       final response = await http.get(url, headers: headers);
-      
-      print('Rozet detay yanıtı: Status: ${response.statusCode}, Body: ${response.body}');
-      
+
+      print(
+          'Rozet detay yanıtı: Status: ${response.statusCode}, Body: ${response.body}');
+
       if (response.statusCode == 200) {
         try {
           final data = json.decode(response.body);
@@ -248,21 +259,21 @@ class BadgeService {
       } else {
         print('Rozet detay isteği başarısız: ${response.statusCode}');
       }
-      
+
       // Fallback: Genel rozet listesinden bu ID'yi bulma denemesi
       try {
         print('Alternatif: Tüm rozetlerden ID araması yapılıyor...');
         final allUrl = Uri.parse('$_baseUrl/badges');
-        
+
         final allResponse = await http.get(allUrl, headers: headers);
-        
+
         if (allResponse.statusCode == 200) {
           final allData = json.decode(allResponse.body);
-          
+
           if (allData is List) {
             for (var item in allData) {
-              if (item is Map<String, dynamic> && 
-                  item['id'] != null && 
+              if (item is Map<String, dynamic> &&
+                  item['id'] != null &&
                   item['id'] == badgeId) {
                 print('Rozet genel listede bulundu');
                 return BadgeModel.fromJson(item);
@@ -273,7 +284,7 @@ class BadgeService {
       } catch (e) {
         print('Alternatif yöntem hatası: $e');
       }
-      
+
       // Fallback badge oluştur
       print('Rozet bilgisi alınamadı, varsayılan oluşturuluyor...');
       return BadgeModel(
@@ -293,13 +304,13 @@ class BadgeService {
     try {
       final url = Uri.parse('$_baseUrl/badges');
       print('API test isteği yapılıyor: $url');
-      
+
       final response = await http.get(url);
       print('Test yanıtı: ${response.statusCode} - ${response.body}');
-      
+
       if (response.statusCode == 200) {
         String responseDetails = 'API yanıt veriyor: ${response.statusCode}';
-        
+
         // API içeriğini anlamaya çalış
         if (response.body.isNotEmpty) {
           try {
@@ -308,7 +319,8 @@ class BadgeService {
             if (data is List) {
               responseDetails += '\nListe uzunluğu: ${data.length}';
             } else if (data is Map) {
-              responseDetails += '\nMap anahtarları: ${(data as Map).keys.join(', ')}';
+              responseDetails +=
+                  '\nMap anahtarları: ${(data as Map).keys.join(', ')}';
             }
           } catch (e) {
             responseDetails += '\nJSON parse edilemedi: $e';
@@ -316,7 +328,7 @@ class BadgeService {
         } else {
           responseDetails += '\nİçerik boş';
         }
-        
+
         return responseDetails;
       } else {
         return 'API hata kodu döndürdü: ${response.statusCode}\n${response.body}';
@@ -326,4 +338,4 @@ class BadgeService {
       return 'API hatası: $e';
     }
   }
-} 
+}
