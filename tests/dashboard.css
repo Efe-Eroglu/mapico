@@ -1,0 +1,192 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+    background-color: #f8f9fa;
+}
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+.header {
+    background: linear-gradient(135deg, #0d6efd, #17a2b8);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+.summary-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+.summary-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    flex: 1 1 200px;
+    min-width: 180px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.summary-card .fa-2x {
+    margin-bottom: 0.5rem;
+}
+.test-category {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.category-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+.category-stats {
+    display: flex;
+    gap: 1rem;
+}
+.stat-item {
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    background-color: #f8f9fa;
+}
+.test-item {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 1.1rem 1.2rem;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    background: #fff;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    transition: background 0.2s, box-shadow 0.2s;
+}
+.test-item:hover {
+    background-color: #f3f7fa;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.test-item:last-child {
+    border-bottom: none;
+}
+.status-success, .status-failed, .status-skipped {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    background: #eafaf1;
+}
+.status-success { color: #28a745; background: #eafaf1; }
+.status-failed { color: #dc3545; background: #fdeaea; }
+.status-skipped { color: #ffc107; background: #fff8e1; }
+.test-item span[style*='font-weight:500'] {
+    font-size: 1.13rem;
+    font-weight: 600;
+    color: #222;
+    margin-right: 12px;
+}
+.test-details {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-left: auto;
+    font-size: 0.97rem;
+    color: #6c757d;
+}
+.test-details i {
+    margin-right: 4px;
+    opacity: 0.7;
+}
+.test-details span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.test-details span:first-child {
+    font-size: 0.97rem;
+    color: #7a7a7a;
+    font-weight: 400;
+}
+.test-details span:last-child {
+    font-size: 0.97rem;
+    color: #b0b0b0;
+    font-weight: 400;
+}
+.test-content {
+    display: none;
+    margin-top: 0.5rem;
+    padding: 1.2rem 1.5rem 1.2rem 1.5rem;
+    background-color: #f9fafb;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    border: 1px solid #e3e6ea;
+    width: 100%;
+    max-width: 900px;
+    position: relative;
+    z-index: 2;
+}
+.test-content.active {
+    display: block;
+}
+.test-info {
+    margin-bottom: 1rem;
+    font-size: 1.04rem;
+    color: #222;
+}
+.test-info p {
+    margin: 0.2rem 0 0.2rem 0;
+}
+.test-stack pre {
+    background-color: #23272e;
+    color: #fff;
+    padding: 1rem;
+    border-radius: 6px;
+    margin: 0.5rem 0 0 0;
+    font-family: 'Fira Mono', 'Consolas', monospace;
+    font-size: 0.98rem;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+.error-details {
+    background-color: #fdeaea;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    padding: 1rem;
+    margin-top: 1rem;
+    font-family: monospace;
+    color: #b71c1c;
+    font-size: 0.97rem;
+    white-space: pre-wrap;
+}
+@media (max-width: 800px) {
+    .summary-row { flex-direction: column; }
+    .category-summary { flex-direction: column; align-items: flex-start; }
+    .test-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 1rem 0.7rem;
+    }
+    .test-details {
+        margin-left: 0;
+        gap: 10px;
+        font-size: 0.95rem;
+    }
+    .test-content {
+        padding: 1rem 0.5rem;
+        max-width: 100%;
+    }
+    .test-stack pre {
+        font-size: 0.93rem;
+    }
+} 
