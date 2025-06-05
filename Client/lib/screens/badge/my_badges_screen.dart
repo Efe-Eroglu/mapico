@@ -224,7 +224,7 @@ class MyBadgesScreen extends GetView<MyBadgesController> {
                       padding: const EdgeInsets.all(16),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        childAspectRatio: 0.75,
+                        childAspectRatio: 1.0,
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
                       ),
@@ -246,136 +246,155 @@ class MyBadgesScreen extends GetView<MyBadgesController> {
 
   Widget _buildUserBadgeCard(BuildContext context, UserBadgeModel userBadge) {
     final badge = userBadge.badge;
+
+    // Simple color palette
+    final List<Color> colors = [
+      const Color(0xFF6200EA), // Deep Purple
+      const Color(0xFF2962FF), // Blue
+      const Color(0xFF00BFA5), // Teal
+      const Color(0xFFFFAB00), // Amber
+      const Color(0xFFD50000), // Red
+    ];
+    
+    // Use fixed green color for earned badges to make them stand out
+    final badgeColor = Colors.green;
     
     return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      elevation: 2,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () => controller.onBadgeTapped(userBadge),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Badge image or icon
-              Expanded(
-                flex: 3,
-                child: badge != null && badge.imageUrl.isNotEmpty
-                    ? Image.network(
-                        badge.imageUrl,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            shape: BoxShape.circle,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Badge icon with colored background
+            Container(
+              height: 90,
+              color: badgeColor.withOpacity(0.05),
+              alignment: Alignment.center,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Badge background with shine effect
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: badgeColor.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        )
+                      ],
+                    ),
+                    child: badge != null && badge.imageUrl.isNotEmpty
+                      ? ClipOval(
+                          child: Image.network(
+                            badge.imageUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.emoji_events,
+                              size: 32,
+                              color: badgeColor,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.emoji_events,
-                            size: 64,
-                            color: Colors.amber.shade800,
-                          ),
-                        ),
-                      )
-                    : Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
+                        )
+                      : Icon(
                           Icons.emoji_events,
-                          size: 64,
-                          color: Colors.amber.shade800,
+                          size: 32,
+                          color: badgeColor,
+                        ),
+                  ),
+                  
+                  // Check mark indicator
+                  Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: badgeColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.check,
+                          size: 12,
+                          color: Colors.white,
                         ),
                       ),
-              ),
-              
-              const SizedBox(height: 8),
-              
-              // Badge title
-              Text(
-                badge != null ? badge.name : 'Rozet #${userBadge.badgeId}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-              
-              const SizedBox(height: 4),
-              
-              // Badge description
-              if (badge != null && badge.description.isNotEmpty)
-                Expanded(
-                  flex: 1,
-                  child: Text(
-                    badge.description,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey.shade700,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
                   ),
-                ),
-              
-              // Earned date
-              if (userBadge.earnedDate.isNotEmpty)
-                Container(
-                  margin: const EdgeInsets.only(top: 8),
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.green.shade50,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.calendar_today,
-                        size: 12,
-                        color: Colors.green.shade700,
+                ],
+              ),
+            ),
+            
+            // Badge info
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Badge name
+                    Text(
+                      badge != null ? badge.name : 'Rozet #${userBadge.badgeId}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                       ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          _formatDate(userBadge.earnedDate),
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.green.shade800,
-                            fontWeight: FontWeight.w500,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                    
+                    // Earned date in pill shape
+                    if (userBadge.earnedDate.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: badgeColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: badgeColor.withOpacity(0.2),
+                            width: 1,
                           ),
-                          overflow: TextOverflow.ellipsis,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.calendar_today_rounded,
+                              size: 12,
+                              color: badgeColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                _formatDate(userBadge.earnedDate),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: badgeColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                  ],
                 ),
-              
-              // Badge category if available
-              if (badge != null && badge.category != null && badge.category!.isNotEmpty)
-                Container(
-                  margin: const EdgeInsets.only(top: 4),
-                  padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    badge.category!,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.blue.shade800,
-                    ),
-                  ),
-                ),
-            ],
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );

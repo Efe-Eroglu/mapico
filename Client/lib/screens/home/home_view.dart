@@ -12,20 +12,7 @@ class HomeView extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mapico'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: controller.onNotificationPressed,
-          ),
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: controller.onProfilePressed,
-          ),
-        ],
-      ),
+      appBar: _buildAppBar(context),
       body: RefreshIndicator(
         onRefresh: controller.onRefresh,
         child: SingleChildScrollView(
@@ -49,8 +36,59 @@ class HomeView extends GetView<HomeController> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: controller.onAddPressed,
-        child: const Icon(Icons.add),
+        backgroundColor: Theme.of(context).primaryColor,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+  
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    return AppBar(
+      elevation: 0,
+      flexibleSpace: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF4B3F72), // Koyu mor
+              Color(0xFF3C6997), // Mavi
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+      ),
+      title: const Text(
+        'Mapico',
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      centerTitle: true,
+      actions: [
+        // Bildirim Butonu
+        IconButton(
+          icon: const Icon(
+            Icons.notifications_outlined,
+            color: Colors.white,
+          ),
+          onPressed: controller.onNotificationPressed,
+        ),
+        // Profil Butonu
+        IconButton(
+          icon: const Icon(
+            Icons.person_outline,
+            color: Colors.white,
+          ),
+          onPressed: controller.onProfilePressed,
+        ),
+      ],
     );
   }
 } 

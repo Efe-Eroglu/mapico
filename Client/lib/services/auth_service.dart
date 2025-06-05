@@ -5,13 +5,17 @@ import 'package:mapico/models/avatar_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {
-  static final String _baseUrl = dotenv.env['API_BASE_URL']!;
+  // API Base URL'i .env dosyasından okuma
+  static String get _baseUrl {
+    // .env dosyasında API_BASE_URL yoksa veya boşsa varsayılan değeri kullan
+    return dotenv.env['API_BASE_URL'] ?? 'http://10.0.2.2:8000/api/v1';
+  }
 
   Future<String?> login({
     required String username,
     required String password,
   }) async {
-    final url = Uri.parse('$_baseUrl/auth/login');
+    final url = Uri.parse('${_baseUrl}/auth/login');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -33,7 +37,7 @@ class AuthService {
     required String dateOfBirth,
     required String password,
   }) async {
-    final url = Uri.parse('$_baseUrl/auth/register');
+    final url = Uri.parse('${_baseUrl}/auth/register');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -69,7 +73,7 @@ class AuthService {
   }
 
   Future<(AvatarModel?, String?)> getAvatar(String token) async {
-    final url = Uri.parse('$_baseUrl/avatars/');
+    final url = Uri.parse('${_baseUrl}/avatars/');
     final response = await http.get(
       url,
       headers: {'Authorization': 'Bearer $token'},
@@ -96,7 +100,7 @@ class AuthService {
 
   // Kullanıcının avatarını getir
   Future<(AvatarModel?, String?)> getUserAvatar(String token) async {
-    final url = Uri.parse('$_baseUrl/users/me/avatar');
+    final url = Uri.parse('${_baseUrl}/users/me/avatar');
     final response = await http.get(
       url,
       headers: {'Authorization': 'Bearer $token'},
@@ -121,7 +125,7 @@ class AuthService {
 
   // Tüm avatarları listele
   Future<(List<AvatarModel>, String?)> getAllAvatars(String token) async {
-    final url = Uri.parse('$_baseUrl/avatars/');
+    final url = Uri.parse('${_baseUrl}/avatars/');
     final response = await http.get(
       url,
       headers: {'Authorization': 'Bearer $token'},
@@ -150,7 +154,7 @@ class AuthService {
 
   // Kullanıcı avatarını güncelle
   Future<String?> updateUserAvatar(String token, int avatarId) async {
-    final url = Uri.parse('$_baseUrl/users/me/avatar');
+    final url = Uri.parse('${_baseUrl}/users/me/avatar');
     final response = await http.post(
       url,
       headers: {
@@ -177,7 +181,7 @@ class AuthService {
   }
 
   Future<(UserModel?, String?)> getCurrentUser(String token) async {
-    final url = Uri.parse('$_baseUrl/auth/me');
+    final url = Uri.parse('${_baseUrl}/auth/me');
     final response = await http.get(
       url,
       headers: {'Authorization': 'Bearer $token'},

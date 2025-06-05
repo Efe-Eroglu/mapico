@@ -7,10 +7,24 @@ class WelcomeCard extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF4B3F72), // Koyu mor
+            Color(0xFF3C6997), // Mavi
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -23,10 +37,12 @@ class WelcomeCard extends GetView<HomeController> {
                     ? CircleAvatar(
                         radius: 30,
                         backgroundImage: NetworkImage(controller.avatar.value!.imageUrl),
+                        backgroundColor: Colors.white.withOpacity(0.2),
                       )
-                    : const CircleAvatar(
+                    : CircleAvatar(
                         radius: 30,
-                        child: Icon(Icons.person, size: 30),
+                        backgroundColor: Colors.white.withOpacity(0.2),
+                        child: const Icon(Icons.person, size: 30, color: Colors.white),
                       )),
                 const SizedBox(width: 16),
                 Expanded(
@@ -35,14 +51,19 @@ class WelcomeCard extends GetView<HomeController> {
                     children: [
                       Obx(() => Text(
                             'Hoş Geldin, ${controller.user.value?.fullName ?? controller.userName.value}',
-                            style: Theme.of(context).textTheme.titleLarge,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           )),
                       const SizedBox(height: 4),
                       Obx(() => Text(
                             controller.userRole.value,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.grey[600],
-                                ),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
                           )),
                     ],
                   ),
@@ -50,15 +71,22 @@ class WelcomeCard extends GetView<HomeController> {
               ],
             ),
             const SizedBox(height: 16),
-            const LinearProgressIndicator(
-              value: 0.7,
-              backgroundColor: Colors.grey,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: 0.7,
+                backgroundColor: Colors.white.withOpacity(0.2),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                minHeight: 6,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Hedefinize ulaşmak için %70 tamamlandı',
-              style: Theme.of(context).textTheme.bodySmall,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withOpacity(0.8),
+              ),
             ),
           ],
         ),
