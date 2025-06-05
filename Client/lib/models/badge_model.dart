@@ -51,13 +51,67 @@ class BadgeModel {
       return '';
     }
     
+    // Kriterlerden puan çıkar
+    int? extractPointValue(Map<String, dynamic>? json) {
+      if (json == null) return null;
+      
+      // Doğrudan point_value veya pointValue olarak var mı?
+      for (final key in ['point_value', 'pointValue']) {
+        final value = json[key];
+        if (value is int) return value;
+      }
+      
+      // Criteria içinde mi?
+      final criteria = json['criteria'];
+      if (criteria is Map<String, dynamic>) {
+        final minScore = criteria['min_score'];
+        if (minScore is int) return minScore;
+      }
+      
+      return null;
+    }
+    
+    // Kategori çıkarma
+    String? extractCategory(Map<String, dynamic>? json) {
+      if (json == null) return null;
+      
+      final category = json['category'];
+      if (category is String && category.isNotEmpty) {
+        return category;
+      }
+      
+      return null;
+    }
+    
+    // Açıklama çıkarma
+    String extractDescription(Map<String, dynamic>? json) {
+      if (json == null) return '';
+      
+      // Doğrudan description olarak var mı?
+      final description = json['description'];
+      if (description is String && description.isNotEmpty) {
+        return description;
+      }
+      
+      // Kriterleri açıklama olarak kullan
+      final criteria = json['criteria'];
+      if (criteria is Map<String, dynamic>) {
+        final minScore = criteria['min_score'];
+        if (minScore != null) {
+          return 'En az $minScore puan gerektirir';
+        }
+      }
+      
+      return '';
+    }
+    
     return BadgeModel(
       id: _safeGet<int?>(json, 'id', null),
       name: _safeGet<String>(json, 'name', 'İsimsiz Rozet'),
-      description: _safeGet<String>(json, 'description', ''),
+      description: extractDescription(json),
       imageUrl: extractImageUrl(json),
-      category: _safeGet<String?>(json, 'category', null),
-      pointValue: _safeGet<int?>(json, 'point_value', null),
+      category: extractCategory(json),
+      pointValue: extractPointValue(json),
     );
   }
 

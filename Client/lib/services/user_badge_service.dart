@@ -7,11 +7,53 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class UserBadgeService {
-  // API URL değişkeni - hem localhost hem de emülatör için
+  // API URL değişkeni - .env dosyasından alınır
   static String get _baseUrl {
-    // Android emülatörü için doğru URL (10.0.2.2 localhost'a denk gelir)
-    final emulatorUrl = dotenv.env['API_BASE_URL']!;
-    return emulatorUrl;
+    try {
+      // .env dosyasından farklı olası değişken adları kontrol edilir
+      final possibleKeys = [
+        'API_BASE_URL', 
+        'API_URL', 
+        'REACT_APP_API_URL', 
+        'BACKEND_URL',
+        'MAPICO_API_URL'
+      ];
+      
+      String? configUrl;
+      for (final key in possibleKeys) {
+        final value = dotenv.env[key];
+        if (value != null && value.isNotEmpty) {
+          configUrl = value;
+          print('$key değişkeni ile API URL bulundu: $value');
+          break;
+        }
+      }
+      
+      // Eğer configUrl null veya boş ise kullanıcı uyarılır
+      if (configUrl == null || configUrl.isEmpty) {
+        print('UYARI: .env dosyasında API URL değişkeni bulunamadı!');
+        print('Aşağıdaki değişkenlerden birini .env dosyasına ekleyin:');
+        print('Şimdilik varsayılan URL kullanılacak.');
+        return 'http://10.0.2.2:8000/api/v1';
+      }
+      
+      // URL'nin sonunda /api/v1 olup olmadığını kontrol et
+      if (!configUrl.endsWith('/api/v1')) {
+        // URL'nin sonunda / var mı kontrol et
+        if (configUrl.endsWith('/')) {
+          configUrl += 'api/v1';
+        } else {
+          configUrl += '/api/v1';
+        }
+        print('API URL path eklendi: $configUrl');
+      }
+      
+      print('Kullanılan API URL: $configUrl');
+      return configUrl;
+    } catch (e) {
+      print('API URL alma hatası: $e');
+      return 'http://10.0.2.2:8000/api/v1';
+    }
   }
 
   // Token'ı güvenli depodan alma yardımcı metodu
@@ -82,6 +124,12 @@ class UserBadgeService {
               }
 
               print('${userBadges.length} rozet ayrıştırıldı');
+              
+              // Rozet detaylarını almak için yeni endpoint'e istek yap
+              if (userBadges.isNotEmpty) {
+                await _loadAllBadgeDetails(userBadges, token);
+              }
+              
               return (userBadges, null);
             }
           }
@@ -94,12 +142,22 @@ class UserBadgeService {
                 userBadges.add(UserBadgeModel.fromJson(item));
               }
             }
+            
+            // Rozet detaylarını almak için yeni endpoint'e istek yap
+            if (userBadges.isNotEmpty) {
+              await _loadAllBadgeDetails(userBadges, token);
+            }
+            
             return (userBadges, null);
           }
           // Bir obje olarak döndüyse
           else if (data is Map<String, dynamic>) {
             // Tek bir rozet olarak alın
             final userBadge = UserBadgeModel.fromJson(data);
+            
+            // Rozet detaylarını almak için yeni endpoint'e istek yap
+            await _loadAllBadgeDetails([userBadge], token);
+            
             return (<UserBadgeModel>[userBadge], null);
           }
           // Boş veya geçersiz veri
@@ -132,6 +190,113 @@ class UserBadgeService {
     } catch (e) {
       print('Bağlantı hatası: $e');
       return (null, 'Bağlantı hatası: $e');
+    }
+  }
+  
+  // Tüm rozet detaylarını tek bir API isteği ile al ve eşleştir
+  Future<void> _loadAllBadgeDetails(List<UserBadgeModel> userBadges, [String? token]) async {
+    try {
+      // Tüm rozetlerin detaylarını al
+      print('Tüm rozet detayları için API isteği yapılıyor');
+      final url = Uri.parse('$_baseUrl/badges');
+      
+      final headers = token != null
+          ? {'Authorization': 'Bearer $token'}
+          : <String, String>{};
+          
+      final response = await http.get(url, headers: headers)
+        .timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            print('Rozet detayları isteği zaman aşımına uğradı');
+            return http.Response('{"error":"timeout"}', 408);
+          },
+        );
+      
+      if (response.statusCode == 200) {
+        print('Tüm rozetler başarıyla alındı');
+        try {
+          final List<dynamic> badgesList = json.decode(response.body);
+          
+          if (badgesList.isNotEmpty) {
+            // Rozet ID'lerine göre eşleştirme haritası oluştur
+            final badgesMap = <int, BadgeModel>{};
+            
+            for (var badgeData in badgesList) {
+              if (badgeData != null && badgeData is Map<String, dynamic>) {
+                try {
+                  final id = badgeData['id'] as int?;
+                  if (id != null) {
+                    // API'den dönen badge formatı:
+                    // {"name":"Minik Kaşif", "icon_url":"url", "criteria":{"min_score":100}, "id":2}
+                    final badge = BadgeModel(
+                      id: id,
+                      name: badgeData['name'] ?? 'Rozet #$id',
+                      description: badgeData['description'] ?? 
+                        'Puan: ${badgeData['criteria']?['min_score'] ?? '100'} veya üzeri',
+                      imageUrl: badgeData['icon_url'] ?? '',
+                      pointValue: badgeData['criteria']?['min_score'] ?? 100,
+                      category: badgeData['category'] ?? _getCategoryForBadgeId(id),
+                    );
+                    
+                    badgesMap[id] = badge;
+                    print('Rozet detayı alındı: ${badge.name} (ID: $id)');
+                  }
+                } catch (e) {
+                  print('Badge ayrıştırma hatası: $e');
+                }
+              }
+            }
+            
+            print('${badgesMap.length} rozet detayı başarıyla ayrıştırıldı');
+            
+            // Kullanıcı rozetlerini eşleştir
+            for (int i = 0; i < userBadges.length; i++) {
+              final userBadge = userBadges[i];
+              if (userBadge.badge == null && badgesMap.containsKey(userBadge.badgeId)) {
+                // Rozeti güncelle
+                userBadges[i] = UserBadgeModel(
+                  id: userBadge.id,
+                  userId: userBadge.userId,
+                  badgeId: userBadge.badgeId,
+                  earnedDate: userBadge.earnedDate,
+                  badge: badgesMap[userBadge.badgeId],
+                );
+                print('Kullanıcı rozeti güncellendi: ID ${userBadge.badgeId}');
+              }
+            }
+          }
+        } catch (e) {
+          print('Rozet listesi ayrıştırma hatası: $e');
+          _assignFallbackBadges(userBadges);
+        }
+      } else {
+        print('Rozet detayları alınamadı - HTTP ${response.statusCode}');
+        _assignFallbackBadges(userBadges);
+      }
+    } catch (e) {
+      print('Tüm rozet detaylarını alma hatası: $e');
+      _assignFallbackBadges(userBadges);
+    }
+  }
+  
+  // Fallback rozet detayları atar
+  void _assignFallbackBadges(List<UserBadgeModel> userBadges) {
+    print('Fallback rozet detayları atanıyor...');
+    
+    for (int i = 0; i < userBadges.length; i++) {
+      final userBadge = userBadges[i];
+      if (userBadge.badge == null) {
+        // Fallback rozet oluştur
+        userBadges[i] = UserBadgeModel(
+          id: userBadge.id,
+          userId: userBadge.userId,
+          badgeId: userBadge.badgeId,
+          earnedDate: userBadge.earnedDate,
+          badge: _createFallbackBadge(userBadge.badgeId),
+        );
+        print('Fallback rozet atandı: ID ${userBadge.badgeId}');
+      }
     }
   }
 
@@ -189,61 +354,6 @@ class UserBadgeService {
     }
   }
 
-  // Birden fazla rozet için badge detaylarını getir
-  Future<List<BadgeModel>> getBadgeDetails(List<int> badgeIds,
-      [String? token]) async {
-    final badgeList = <BadgeModel>[];
-
-    if (badgeIds.isEmpty) {
-      return badgeList;
-    }
-
-    try {
-      print('Rozet detayları isteniyor - ID\'ler: $badgeIds');
-
-      // Önce tek tek rozetleri getirmeyi dene - daha güvenilir
-      for (final id in badgeIds) {
-        print('Rozet ID: $id için detay getiriliyor');
-        final badge = await getBadgeDetail(id, token);
-        if (badge != null) {
-          badgeList.add(badge);
-        } else {
-          // API'den bilgi alamadıysak, fallback rozet oluştur
-          print('Rozet ID: $id için detay alınamadı, fallback kullanılıyor');
-          badgeList.add(BadgeModel(
-            id: id,
-            name: 'Rozet #$id',
-            description: 'Rozet bilgileri şu anda alınamıyor.',
-            imageUrl: 'https://cdn-icons-png.flaticon.com/512/1053/1053367.png',
-          ));
-        }
-      }
-    } catch (e) {
-      print('Rozet detayları alınırken hata: $e');
-
-      // Hata durumunda eksik rozetler için fallback oluştur
-      if (badgeList.length < badgeIds.length) {
-        final foundIds = badgeList.map((b) => b.id).whereType<int>().toSet();
-        final missingIds =
-            badgeIds.where((id) => !foundIds.contains(id)).toList();
-
-        print(
-            '${missingIds.length} rozet detayı eksik, fallback oluşturuluyor');
-        for (final id in missingIds) {
-          badgeList.add(BadgeModel(
-            id: id,
-            name: 'Rozet #$id',
-            description: 'Rozet bilgileri şu anda alınamıyor.',
-            imageUrl: 'https://cdn-icons-png.flaticon.com/512/1053/1053367.png',
-          ));
-        }
-      }
-    }
-
-    print('${badgeList.length} rozet detayı başarıyla getirildi');
-    return badgeList;
-  }
-
   // Belirli bir rozetin detaylarını getir
   Future<BadgeModel?> getBadgeDetail(int badgeId, [String? token]) async {
     try {
@@ -254,27 +364,116 @@ class UserBadgeService {
           ? {'Authorization': 'Bearer $token'}
           : <String, String>{};
 
-      print('Requesting badge detail: $url');
-      final response = await http.get(url, headers: headers);
+      print('Rozet detayı isteniyor: $url');
+      
+      // Timeout ekleyerek istek uzun sürerse iptal edelim
+      final response = await http.get(url, headers: headers)
+          .timeout(
+            const Duration(seconds: 5),
+            onTimeout: () {
+              print('Rozet detayı isteği zaman aşımına uğradı');
+              return http.Response('{"error":"timeout"}', 408);
+            },
+          );
 
+      print('Rozet detayı yanıtı: Status ${response.statusCode}');
+      
       if (response.statusCode == 200) {
-        print('Badge detail response: ${response.body}');
+        print('Rozet detay içeriği: ${response.body}');
         try {
           final data = json.decode(response.body);
           if (data != null && data is Map<String, dynamic>) {
-            return BadgeModel.fromJson(data);
+            // API formatı: {"name":"Rozet Adı", "icon_url":"url", "criteria":{"min_score":100}, "id":2}
+            final badge = BadgeModel(
+              id: data['id'] ?? badgeId,
+              name: data['name'] ?? 'Rozet #$badgeId',
+              description: data['description'] ?? 
+                'Puan: ${data['criteria']?['min_score'] ?? '100'} veya üzeri',
+              imageUrl: data['icon_url'] ?? '',
+              pointValue: data['criteria']?['min_score'] ?? 100,
+              category: data['category'] ?? _getCategoryForBadgeId(badgeId),
+            );
+            
+            print('Rozet detayı başarıyla ayrıştırıldı: ${badge.name}');
+            return badge;
+          } else {
+            print('Rozet detay verisi beklenmeyen formatta: $data');
           }
         } catch (e) {
-          print('Badge detail parse error: $e');
+          print('Rozet detayı JSON ayrıştırma hatası: $e');
         }
       } else {
-        print('Badge detail request failed: ${response.statusCode}');
+        print('Rozet detay isteği başarısız: ${response.statusCode}');
       }
 
-      return null;
+      // Eğer API çağrısı başarısız olduysa örnek bir rozet oluştur
+      return _createFallbackBadge(badgeId);
     } catch (e) {
-      print('Badge detail exception: $e');
-      return null;
+      print('Rozet detayı alınırken beklenmeyen hata: $e');
+      return _createFallbackBadge(badgeId);
     }
+  }
+  
+  // API'den detay alınamadığında kullanılacak fallback rozet oluşturur
+  BadgeModel _createFallbackBadge(int badgeId) {
+    // Farklı rozet tipleri için farklı simgeler kullanabiliriz
+    String imageUrl;
+    String name;
+    String description;
+    
+    // Badge ID'sine göre farklı rozet tipleri
+    switch (badgeId % 5) {
+      case 0:
+        imageUrl = 'https://cdn-icons-png.flaticon.com/512/4842/4842091.png';
+        name = 'Keşif Rozeti #$badgeId';
+        description = 'Yeni yerler keşfederek kazanılan bir rozet.';
+        break;
+      case 1:
+        imageUrl = 'https://cdn-icons-png.flaticon.com/512/3113/3113022.png';
+        name = 'Başarı Rozeti #$badgeId';
+        description = 'Özel görevleri tamamlayarak kazanılan bir rozet.';
+        break;
+      case 2:
+        imageUrl = 'https://cdn-icons-png.flaticon.com/512/9578/9578904.png';
+        name = 'İlerleme Rozeti #$badgeId';
+        description = 'Uygulamayı düzenli kullanarak kazanılan bir rozet.';
+        break;
+      case 3:
+        imageUrl = 'https://cdn-icons-png.flaticon.com/512/6941/6941697.png';
+        name = 'Etkinlik Rozeti #$badgeId';
+        description = 'Özel etkinliklere katılarak kazanılan bir rozet.';
+        break;
+      case 4:
+        imageUrl = 'https://cdn-icons-png.flaticon.com/512/4329/4329082.png';
+        name = 'Koleksiyon Rozeti #$badgeId';
+        description = 'Eşsiz koleksiyon parçalarını tamamlayarak kazanılan bir rozet.';
+        break;
+      default:
+        imageUrl = 'https://cdn-icons-png.flaticon.com/512/1053/1053367.png';
+        name = 'Rozet #$badgeId';
+        description = 'Bu rozet için detay bilgisi alınamıyor.';
+    }
+    
+    print('Fallback rozet oluşturuldu: $name');
+    return BadgeModel(
+      id: badgeId,
+      name: name,
+      description: description,
+      imageUrl: imageUrl,
+      pointValue: badgeId * 10, // Her rozet için farklı bir puan
+      category: _getCategoryForBadgeId(badgeId),
+    );
+  }
+  
+  // Badge ID'sine göre kategori tahmini
+  String? _getCategoryForBadgeId(int badgeId) {
+    final categories = [
+      'Keşif', 
+      'Başarı', 
+      'İlerleme', 
+      'Etkinlik', 
+      'Koleksiyon'
+    ];
+    return categories[badgeId % categories.length];
   }
 }

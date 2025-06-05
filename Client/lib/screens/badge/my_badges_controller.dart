@@ -131,16 +131,21 @@ class MyBadgesController extends BaseController {
     }
   }
   
-  // Rozet detaylarını almak için yardımcı metod
+  // Rozet detaylarını almak için yardımcı metod - geliştirildi
   Future<void> getBadgeDetails(List<UserBadgeModel> userBadges) async {
+    if (userBadges.isEmpty) {
+      print("Kullanıcı rozeti bulunamadı, detay alınmasına gerek yok");
+      return;
+    }
+    
     // Badge id'lerini topla
     final badgeIds = <int>[];
     final badgesWithoutDetails = <UserBadgeModel>[];
     
-    print("=== Badge Details Matching Process ===");
+    print("=== Rozet Detayları Eşleştirme İşlemi ===");
     // Önce mevcut rozet durumunu logla
     for (final userBadge in userBadges) {
-      print("UserBadge ID: ${userBadge.id}, Badge ID: ${userBadge.badgeId}, Has Badge: ${userBadge.badge != null}");
+      print("UserBadge ID: ${userBadge.id}, Badge ID: ${userBadge.badgeId}, Rozet Var: ${userBadge.badge != null}");
       
       // Rozeti olmayan kullanıcı rozetlerini topla
       if (userBadge.badge == null && userBadge.badgeId > 0) {
@@ -160,117 +165,60 @@ class MyBadgesController extends BaseController {
       const storage = FlutterSecureStorage();
       final token = await storage.read(key: 'jwt_token');
       
-      final details = await userBadgeService.getBadgeDetails(badgeIds, token);
+      print("Rozet detayları için token: ${token != null ? 'mevcut' : 'bulunamadı'}");
       
-      if (details.isNotEmpty) {
-        print("${details.length} rozet detayı API'den alındı");
-        badgeDetails.value = details;
-        
-        // Rozet ID'leri ile eşleştirme haritası oluştur
-        final detailsMap = {for (var badge in details) badge.id ?? 0: badge};
-        print("Badge details map: ${detailsMap.keys}");
-        
-        // Kullanıcı rozeti listesini güncelle
-        final updatedUserBadges = <UserBadgeModel>[];
-        
-        for (int i = 0; i < userBadges.length; i++) {
-          final userBadge = userBadges[i];
+      // Her bir rozet için detay alalım
+      int detailsObtained = 0;
+      final updatedUserBadges = <UserBadgeModel>[];
+      
+      for (final userBadge in userBadges) {
+        if (userBadge.badge == null && userBadge.badgeId > 0) {
+          print("Rozet detayı alınıyor - ID: ${userBadge.badgeId}");
           
-          // Rozet detayı yoksa ve badgeId bir detayla eşleşiyorsa güncelle
-          if (userBadge.badge == null && 
-              userBadge.badgeId > 0 && 
-              detailsMap.containsKey(userBadge.badgeId)) {
+          // Tek bir rozet detayını al
+          final badge = await userBadgeService.getBadgeDetail(userBadge.badgeId, token);
+          
+          if (badge != null) {
+            print("Rozet detayı başarıyla alındı: ${badge.name}");
+            detailsObtained++;
             
-            print("Badge ID ${userBadge.badgeId} için detay bulundu");
-            // Yeni nesne oluştur
+            // Bu rozet için UserBadgeModel'i güncelle
             final updatedBadge = UserBadgeModel(
               id: userBadge.id,
               userId: userBadge.userId,
               badgeId: userBadge.badgeId,
               earnedDate: userBadge.earnedDate,
-              badge: detailsMap[userBadge.badgeId],
+              badge: badge,
             );
             
             updatedUserBadges.add(updatedBadge);
           } else {
-            if (userBadge.badge == null && userBadge.badgeId > 0) {
-              print("Badge ID ${userBadge.badgeId} için detay bulunamadı");
-              
-              // Detayı bulunamayan rozet için varsayılan
-              final fallbackBadge = BadgeModel(
-                id: userBadge.badgeId,
-                name: 'Rozet #${userBadge.badgeId}',
-                description: 'Bu rozet için bilgiler şu anda alınamıyor.',
-                imageUrl: 'https://cdn-icons-png.flaticon.com/512/1053/1053367.png',
-              );
-              
-              // Fallback badge ile güncelle
-              final updatedBadge = UserBadgeModel(
-                id: userBadge.id,
-                userId: userBadge.userId,
-                badgeId: userBadge.badgeId,
-                earnedDate: userBadge.earnedDate,
-                badge: fallbackBadge,
-              );
-              
-              updatedUserBadges.add(updatedBadge);
-            } else {
-              // Zaten rozet detayı var veya badgeId geçersiz
-              updatedUserBadges.add(userBadge);
-            }
+            print("Rozet detayı alınamadı - ID: ${userBadge.badgeId}");
+            // UserBadgeService sınıfı artık her zaman bir badge döndürüyor
+            // (fallback olarak da olsa), ama burada da önlem alalım
+            updatedUserBadges.add(userBadge);
           }
+        } else {
+          // Zaten detayı olan rozeti değiştirmeden ekle
+          updatedUserBadges.add(userBadge);
         }
-        
-        // Güncellenmiş listeyi ata
-        userBadges.clear();
-        userBadges.addAll(updatedUserBadges);
-        update();
-        
-        // Kategorileri güncelle
-        _collectCategories();
-      } else {
-        print("API'den rozet detayı alınamadı");
-        _createFallbackBadges(userBadges);
       }
+      
+      print("${detailsObtained} rozet detayı başarıyla alındı");
+      
+      // Güncellenmiş listeyi ata
+      userBadges.clear();
+      userBadges.addAll(updatedUserBadges);
+      update();
+      
+      // Kategorileri güncelle
+      _collectCategories();
+      
     } catch (e) {
-      print('Rozet detaylarını alırken hata: $e');
-      _createFallbackBadges(userBadges);
+      print('Rozet detaylarını alırken beklenmeyen hata: $e');
+      // Hata durumunda da kategorileri güncelleyelim
+      _collectCategories();
     }
-  }
-  
-  // Fallback rozet detayları oluştur
-  void _createFallbackBadges(List<UserBadgeModel> userBadges) {
-    print("Fallback rozetler oluşturuluyor...");
-    final updatedUserBadges = <UserBadgeModel>[];
-    
-    for (final userBadge in userBadges) {
-      if (userBadge.badge == null && userBadge.badgeId > 0) {
-        // Bu rozet için fallback detay oluştur
-        final fallbackBadge = BadgeModel(
-          id: userBadge.badgeId,
-          name: 'Rozet #${userBadge.badgeId}',
-          description: 'Bu rozet için bilgiler şu anda alınamıyor.',
-          imageUrl: 'https://cdn-icons-png.flaticon.com/512/1053/1053367.png',
-        );
-        
-        updatedUserBadges.add(UserBadgeModel(
-          id: userBadge.id,
-          userId: userBadge.userId,
-          badgeId: userBadge.badgeId,
-          earnedDate: userBadge.earnedDate,
-          badge: fallbackBadge,
-        ));
-      } else {
-        updatedUserBadges.add(userBadge);
-      }
-    }
-    
-    userBadges.clear();
-    userBadges.addAll(updatedUserBadges);
-    update();
-    
-    // Kategorileri güncelle
-    _collectCategories();
   }
   
   // Kategorileri topla

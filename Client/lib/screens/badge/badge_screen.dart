@@ -209,7 +209,7 @@ class BadgeScreen extends GetView<BadgeController> {
                       padding: const EdgeInsets.all(16),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        childAspectRatio: 0.75,
+                        childAspectRatio: 1.0,
                         crossAxisSpacing: 16,
                         mainAxisSpacing: 16,
                       ),
@@ -230,116 +230,124 @@ class BadgeScreen extends GetView<BadgeController> {
   }
 
   Widget _buildBadgeCard(BuildContext context, BadgeModel badge) {
+    // Simple color palette
+    final List<Color> colors = [
+      const Color(0xFF6200EA), // Deep Purple
+      const Color(0xFF2962FF), // Blue
+      const Color(0xFF00BFA5), // Teal
+      const Color(0xFFFFAB00), // Amber
+      const Color(0xFFD50000), // Red
+    ];
+    
+    final colorIndex = (badge.id ?? badge.name.hashCode) % colors.length;
+    final badgeColor = colors[colorIndex];
+    
     return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      elevation: 2,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: () => controller.onBadgeTapped(badge),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Badge image or icon
-              Expanded(
-                flex: 3,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Badge icon with colored background
+            Container(
+              height: 90,
+              color: badgeColor.withOpacity(0.05),
+              alignment: Alignment.center,
+              child: Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: badgeColor.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    )
+                  ],
+                ),
                 child: badge.imageUrl.isNotEmpty
-                    ? Image.network(
+                  ? ClipOval(
+                      child: Image.network(
                         badge.imageUrl,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.military_tech,
-                            size: 64,
-                            color: Colors.amber.shade800,
-                          ),
-                        ),
-                      )
-                    : Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Icon(
                           Icons.military_tech,
-                          size: 64,
-                          color: Colors.amber.shade800,
+                          size: 32,
+                          color: badgeColor,
                         ),
                       ),
+                    )
+                  : Icon(
+                      Icons.military_tech,
+                      size: 32,
+                      color: badgeColor,
+                    ),
               ),
-              
-              const SizedBox(height: 12),
-              
-              // Badge title
-              Text(
-                badge.name,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-              
-              const SizedBox(height: 4),
-              
-              // Badge description
-              Expanded(
-                flex: 2,
-                child: Text(
-                  badge.description,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade700,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              
-              // Badge category & points
-              if (badge.category != null || badge.pointValue != null)
-                Container(
-                  margin: const EdgeInsets.only(top: 8),
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (badge.pointValue != null) ...[
-                        Icon(
-                          Icons.stars,
-                          size: 14,
-                          color: Colors.amber.shade800,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${badge.pointValue} Puan',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.blue.shade800,
-                            fontWeight: FontWeight.w500,
+            ),
+            
+            // Badge info
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Badge name
+                    Text(
+                      badge.name,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                    
+                    // Point info if available
+                    if (badge.pointValue != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: badgeColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: badgeColor.withOpacity(0.2),
+                            width: 1,
                           ),
                         ),
-                      ],
-                    ],
-                  ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.star_rounded,
+                              size: 14,
+                              color: badgeColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${badge.pointValue}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: badgeColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ),
-            ],
-          ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
-} 
+}
