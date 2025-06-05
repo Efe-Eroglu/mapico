@@ -5,19 +5,57 @@ import 'package:mapico/models/flight_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mapico/services/user_badge_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class FlightDetailsController extends GetxController {
   final RxBool isLoading = true.obs;
   final RxList<dynamic> flightStops = <dynamic>[].obs;
   final Rx<FlightModel?> flight = Rx<FlightModel?>(null);
   final RxMap<int, dynamic> badgeDetails = <int, dynamic>{}.obs;
+  
+  // API base URL
+  final String baseUrl = dotenv.env['API_BASE_URL']!;
 
   @override
   void onInit() {
     super.onInit();
-    final flightData = Get.arguments as FlightModel;
-    flight.value = flightData;
-    fetchFlightDetails(flightData.id);
+    try {
+      print('FlightDetailsController onInit called');
+      final args = Get.arguments;
+      print('Arguments received: $args');
+      
+      if (args == null) {
+        print('ERROR: No arguments received');
+        Get.snackbar(
+          'Hata',
+          'Uçuş bilgileri alınamadı',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+      
+      if (args is! FlightModel) {
+        print('ERROR: Arguments are not FlightModel: ${args.runtimeType}');
+        Get.snackbar(
+          'Hata',
+          'Uçuş bilgileri doğru formatta değil',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+      
+      final flightData = args as FlightModel;
+      print('Flight data received: ID=${flightData.id}, Title=${flightData.title}');
+      flight.value = flightData;
+      fetchFlightDetails(flightData.id);
+    } catch (e) {
+      print('ERROR in FlightDetailsController.onInit: $e');
+      Get.snackbar(
+        'Hata',
+        'Uçuş detayları yüklenirken bir hata oluştu: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   Future<void> fetchBadgeDetails(int badgeId) async {
@@ -25,7 +63,7 @@ class FlightDetailsController extends GetxController {
 
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/v1/badges/$badgeId'),
+        Uri.parse('$baseUrl/badges/$badgeId'),
       );
 
       if (response.statusCode == 200) {
@@ -41,7 +79,7 @@ class FlightDetailsController extends GetxController {
     try {
       isLoading.value = true;
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/v1/flight_stops/by_flight/$flightId'),
+        Uri.parse('$baseUrl/flight_stops/by_flight/$flightId'),
       );
 
       if (response.statusCode == 200) {

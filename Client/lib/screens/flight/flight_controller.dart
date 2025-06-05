@@ -5,6 +5,7 @@ import 'package:mapico/services/flight_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class FlightController extends BaseController {
   final flights = <FlightModel>[].obs;
@@ -16,6 +17,8 @@ class FlightController extends BaseController {
   bool get isTestMode => _isTestMode;
   
   final flightService = FlightService();
+  // API base URL
+  final String baseUrl = dotenv.env['API_BASE_URL']!;
   
   @override
   void onInit() {
@@ -28,7 +31,7 @@ class FlightController extends BaseController {
 
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/v1/badges/$badgeId'),
+        Uri.parse('$baseUrl/badges/$badgeId'),
       );
 
       if (response.statusCode == 200) {
@@ -43,7 +46,7 @@ class FlightController extends BaseController {
   Future<void> fetchFlightStops() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/api/v1/flight_stops/all'),
+        Uri.parse('$baseUrl/flight_stops/all'),
       );
 
       if (response.statusCode == 200) {
@@ -168,7 +171,17 @@ class FlightController extends BaseController {
   }
   
   void onFlightTapped(FlightModel flight) {
-    Get.toNamed('/flight_details', arguments: flight);
+    try {
+      print('Navigating to flight details for flight: ${flight.id} - ${flight.title}');
+      Get.toNamed('/flight_details', arguments: flight);
+    } catch (e) {
+      print('Error navigating to flight details: $e');
+      Get.snackbar(
+        'Hata',
+        'Uçuş detayları açılırken bir hata oluştu: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 }
 
