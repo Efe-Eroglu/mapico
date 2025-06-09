@@ -156,3 +156,9 @@ App Store’da yayınlandığında ilk siz haberdar olun! 🔔
 
 ## 📋 Not
 - Proje ait dokümanlara web sitemizden veya github repomuzun docs klasörü altından ulaşabilirsiniz.
+- Uygulamayı test etmek için test hesabımızı kullanabilirsiniz
+  
+  ```
+  Kullanıcı Adı : admin@admin.com
+  Şifre : admin123
+  ```
