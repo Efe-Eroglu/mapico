@@ -122,8 +122,11 @@ Mobil uygulamamız, çok yakında **hem Android hem de iOS** platformlarında ku
 ### 📦 Android APK
 
 📲 **Android sürümümüz çok yakında yayınlanacak!**  
-Takipte kalın, yerel kültürlerle dolu AR deneyimini Android cihazlarınızda da keşfedin! 🤳
+Ön inceleme olarak apk'mızı indirmek isterseniz web sitemizi ziyaret edebilir ve ilgili bağlantı aracılığıyla uygulamamızı indirebilirsiniz📱
 
+Ve ya alternatif olarak drive üzerinden apk'mızı deneyebilirsizin.
+
+Mapico Mobile V1.0 => https://drive.google.com/file/d/1e-yjsOd5lrb5UAb27bXU4H4Sqrb_B1FI/view?usp=drive_link
 ---
 
 <br>
