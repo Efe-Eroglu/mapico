@@ -126,7 +126,7 @@ Mobil uygulamamız, çok yakında **hem Android hem de iOS** platformlarında ku
 
  Ve ya alternatif olarak drive üzerinden apk'mızı deneyebilirsizin.
 
- Mapico Mobile V1.0 => https://drive.google.com/file/d/1e-yjsOd5lrb5UAb27bXU4H4Sqrb_B1FI/view?usp=drive_link
+ Mapico Mobile V1.0 => [https://drive.google.com/file/d/1e-yjsOd5lrb5UAb27bXU4H4Sqrb_B1FI/view?usp=drive_link](https://drive.google.com/file/d/1e-yjsOd5lrb5UAb27bXU4H4Sqrb_B1FI/view?usp=sharing)
 
 ---
 
