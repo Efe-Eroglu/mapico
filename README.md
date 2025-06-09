@@ -151,6 +151,7 @@ App Store’da yayınlandığında ilk siz haberdar olun! 🔔
 - 🎬 Youtube Tanıtım Videomuz : https://www.youtube.com/watch?v=a013ftDj79w
 - 🎬 Youtube Uygulama İnceleme Videomuz : https://youtu.be/3pHbEzOn28s
 - 🌐 Web Sitemiz : https://mapicoo.github.io
+- 📍 Email : mapicosoftware@gmail.com
 
 
 ## 📋 Not
